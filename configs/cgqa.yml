@@ -1,0 +1,25 @@
+---
+experiment:
+  name: DBC/cgqa
+dataset:
+  data_dir: cgqa
+  dataset: cgqa
+  splitname: compositional-split-natural
+model_params:
+  emb_dim: 1024
+training:
+  batch_size: 512
+  load:
+  lr: 5.0e-05
+  max_epochs: 100
+  save_every: 10000
+  test_batch_size: 32
+  test_set: val
+  topk: 1
+  wd: 5.0e-05
+  workers: 8
+  drop: 0.6
+  res_epoch: 20
+
+ 
+
