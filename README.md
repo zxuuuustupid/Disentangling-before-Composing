@@ -10,7 +10,7 @@ Disentangling before Composing: Learning Invariant Disentangled Features for Com
 
 2. We recommend using Anaconda for environment setup. To create the environment and activate it, please run:
 ```
-    conda env create --file environment.yml
+    mamba conda env create --file environment.yml
     conda activate czsl
 ```
 
