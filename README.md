@@ -20,7 +20,7 @@ Disentangling before Composing: Learning Invariant Disentangled Features for Com
 4. To run DBC for UT-Zappos dataset:
 ```
     Training:
-    python train.py --config config/zappos.yml
+    python train.py --config configs/zappos.yml
 
     Testing:
     python test.py --logpath LOG_DIR
