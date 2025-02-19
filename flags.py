@@ -1,6 +1,6 @@
 import argparse
 
-DATA_FOLDER = "ROOT_FOLDER"
+DATA_FOLDER = "F:/Project/CZSL/code/Disentangling-before-Composing"
 
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
@@ -29,7 +29,7 @@ parser.add_argument('--lambda_res', type=float, default=1/6, help='weight of res
 
 # Hyperparameters
 parser.add_argument('--topk', type=int, default=1,help="Compute topk accuracy")
-parser.add_argument('--workers', type=int, default=8,help="Number of workers")
+parser.add_argument('--workers', type=int, default=4,help="Number of workers")
 parser.add_argument('--batch_size', type=int, default=512,help="Training batch size")
 parser.add_argument('--lr', type=float, default=5e-5,help="Learning rate")
 parser.add_argument('--wd', type=float, default=5e-5,help="Weight decay")

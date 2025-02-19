@@ -2,13 +2,13 @@
 experiment:
   name: DBC/utzappos
 dataset:
-  data_dir: ut-zap50k
+  data_dir: ut-zappos
   dataset: utzappos
   splitname: compositional-split-natural
 model_params:
   emb_dim: 800
 training:
-  batch_size: 256
+  batch_size: 32
   load:
   lr: 0.0001
   max_epochs: 100
@@ -17,6 +17,6 @@ training:
   test_set: val
   topk: 1
   wd: 5.0e-05
-  workers: 8
+  workers: 4
   drop: 0.3
   res_epoch: 20

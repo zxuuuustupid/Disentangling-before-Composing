@@ -5,7 +5,7 @@ import sys
 import yaml
 import PIL
 import numpy as np
-from matplotlib import pyplot as plt
+from  matplotlib import pyplot as plt
 import skimage, skimage.transform
 
 def chunks(l, n):
