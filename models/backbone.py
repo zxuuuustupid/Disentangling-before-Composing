@@ -3,6 +3,7 @@ import torch.nn as nn
 import torchvision
 import pdb
 
+
 class Backbone(nn.Module):
     def __init__(self, backbone='resnet50'):
         super(Backbone, self).__init__()
@@ -34,8 +35,9 @@ class Backbone(nn.Module):
 
         return out
 
+
 class new_model(nn.Module):
-    def __init__(self,output_layer = None):
+    def __init__(self, output_layer=None):
         super().__init__()
         self.pretrained = torchvision.models.resnet18(pretrained=True)
         self.output_layer = output_layer
@@ -47,30 +49,31 @@ class new_model(nn.Module):
             else:
                 break
         # pdb.set_trace()
-        for i in range(1,len(self.layers)-self.layer_count):
+        for i in range(1, len(self.layers) - self.layer_count):
             self.dummy_var = self.pretrained._modules.pop(self.layers[-i])
-        
+
         self.net = nn.Sequential(self.pretrained._modules)
         self.pretrained = None
 
-    def forward(self,x):
+    def forward(self, x):
         x = self.net(x)
         return x
 
+
 class comb_resnet(nn.Module):
     def __init__(self):
-        super(comb_resnet,self).__init__()
-        self.l1 = new_model(output_layer = 'layer1').eval().cuda()
-        self.l2 = new_model(output_layer = 'layer2').eval().cuda()
-        self.l3 = new_model(output_layer = 'layer3').eval().cuda()
-        self.l4 = new_model(output_layer = 'layer4').eval().cuda()
+        super(comb_resnet, self).__init__()
+        self.l1 = new_model(output_layer='layer1').eval().cuda()
+        self.l2 = new_model(output_layer='layer2').eval().cuda()
+        self.l3 = new_model(output_layer='layer3').eval().cuda()
+        self.l4 = new_model(output_layer='layer4').eval().cuda()
         self.pool = nn.AdaptiveAvgPool2d(output_size=(7, 7))
-    
-    def forward(self,img1):
-        f1 = self.pool(self.l1(img1)) #.squeeze()
-        f2 = self.pool(self.l2(img1)) #.squeeze()
-        f3 = self.pool(self.l3(img1)) #.squeeze()
-        f4 = self.pool(self.l4(img1)) #.squeeze()
+
+    def forward(self, img1):
+        f1 = self.pool(self.l1(img1))  # .squeeze()
+        f2 = self.pool(self.l2(img1))  # .squeeze()
+        f3 = self.pool(self.l3(img1))  # .squeeze()
+        f4 = self.pool(self.l4(img1))  # .squeeze()
         # pdb.set_trace()
-        con = torch.cat((f1,f2,f3,f4),1)
+        con = torch.cat((f1, f2, f3, f4), 1)
         return con

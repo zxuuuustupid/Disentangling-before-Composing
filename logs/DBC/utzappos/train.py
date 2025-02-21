@@ -6,6 +6,7 @@ from models.dbc import DBC
 
 from torch.utils.tensorboard import SummaryWriter
 import torch.backends.cudnn as cudnn
+
 cudnn.benchmark = True
 
 import tqdm
@@ -21,12 +22,12 @@ from flags import parser, DATA_FOLDER
 
 torch.multiprocessing.set_sharing_strategy('file_system')
 
-
 best_auc = 0
 best_hm = 0
-best_unseen=0
+best_unseen = 0
 compose_switch = True
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
+
 
 def freeze(m):
     m.eval()
@@ -34,15 +35,16 @@ def freeze(m):
         p.requires_grad = False
         p.grad = None
 
+
 def main():
     args = parser.parse_args()
     load_args(args.config, args)
     logpath = os.path.join(args.cv_dir, args.name)
     os.makedirs(logpath, exist_ok=True)
     save_args(args, logpath, args.config)
-    writer = SummaryWriter(log_dir = logpath, flush_secs = 30)
-    
-    seed=args.seed
+    writer = SummaryWriter(log_dir=logpath, flush_secs=30)
+
+    seed = args.seed
     torch.manual_seed(seed)
     torch.cuda.manual_seed(seed)
     torch.cuda.manual_seed_all(seed)
@@ -64,7 +66,7 @@ def main():
 
     testset = dset.CompositionDataset(
         root=os.path.join(DATA_FOLDER, args.data_dir),
-        phase=args.test_set, 
+        phase=args.test_set,
         split=args.splitname
     )
     testloader = torch.utils.data.DataLoader(
@@ -73,13 +75,12 @@ def main():
         shuffle=False,
         num_workers=args.workers)
 
-
     model = DBC(trainset, args)
     model = model.to(device)
     freeze(model.feat_extractor)
 
     model_params = [param for name, param in model.named_parameters() if param.requires_grad]
-    optim_params = [{'params':model_params}]
+    optim_params = [{'params': model_params}]
     optimizer = optim.Adam(optim_params, lr=args.lr, weight_decay=args.wd)
 
     train = train_normal
@@ -92,7 +93,7 @@ def main():
         start_epoch = checkpoint['epoch']
         print('Loaded model from ', args.load)
 
-    for epoch in tqdm(range(start_epoch, args.max_epochs + 1), desc = 'Current epoch'):
+    for epoch in tqdm(range(start_epoch, args.max_epochs + 1), desc='Current epoch'):
         train(epoch, model, trainloader, optimizer, writer)
         if epoch % args.eval_val_every == 0:
             with torch.no_grad():
@@ -107,25 +108,24 @@ def train_normal(epoch, model, trainloader, optimizer, writer):
 
     train_loss = 0.0
 
-    for idx, data in tqdm(enumerate(trainloader), total=len(trainloader), desc = 'Training'):
+    for idx, data in tqdm(enumerate(trainloader), total=len(trainloader), desc='Training'):
         data = [d.to(device) for d in data]
 
         loss, _ = model(data, epoch)
- 
+
         optimizer.zero_grad()
         loss.backward(retain_graph=True)
         optimizer.step()
 
         train_loss += loss.item()
 
-    train_loss = train_loss/len(trainloader)
+    train_loss = train_loss / len(trainloader)
     writer.add_scalar('Loss/train_total', train_loss, epoch)
 
     print('Epoch: {}| Loss: {}'.format(epoch, round(train_loss, 2)))
 
 
 def test(epoch, model, testloader, evaluator, writer, args, logpath):
-
     global best_auc, best_hm, best_unseen
 
     def save_checkpoint(filename):
@@ -143,10 +143,10 @@ def test(epoch, model, testloader, evaluator, writer, args, logpath):
     for idx, data in tqdm(enumerate(testloader), total=len(testloader), desc='Testing'):
         data = [d.to(device) for d in data]
 
-        _, predictions= model(data, epoch)
+        _, predictions = model(data, epoch)
 
-        attr_truth, obj_truth, pair_truth =data[1], data[2], data[3]
-        
+        attr_truth, obj_truth, pair_truth = data[1], data[2], data[3]
+
         all_pred.append(predictions)
         all_attr_gt.append(attr_truth)
         all_obj_gt.append(obj_truth)
