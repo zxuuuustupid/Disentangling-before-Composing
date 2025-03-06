@@ -102,9 +102,9 @@ class CompositionDataset(Dataset):
             attrs, objs = zip(*pairs)
             return attrs, objs, pairs
 
-        tr_attrs, tr_objs, tr_pairs = parse_pairs(ospj(self.root, self.split, 'train_pairs.txt'))
-        vl_attrs, vl_objs, vl_pairs = parse_pairs(ospj(self.root, self.split, 'val_pairs.txt'))
-        ts_attrs, ts_objs, ts_pairs = parse_pairs(ospj(self.root, self.split, 'test_pairs.txt'))
+        tr_attrs, tr_objs, tr_pairs = parse_pairs(ospj(self.root, self.split, 'train_pairs.txt').replace('\\', '/'))
+        vl_attrs, vl_objs, vl_pairs = parse_pairs(ospj(self.root, self.split, 'val_pairs.txt').replace('\\', '/'))
+        ts_attrs, ts_objs, ts_pairs = parse_pairs(ospj(self.root, self.split, 'test_pairs.txt').replace('\\', '/'))
 
         all_attrs, all_objs = sorted(
             list(set(tr_attrs + vl_attrs + ts_attrs))), sorted(

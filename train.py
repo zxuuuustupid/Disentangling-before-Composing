@@ -53,7 +53,7 @@ def main():
     torch.backends.cudnn.benchmark = False
 
     trainset = dset.CompositionDataset(
-        root=os.path.join(DATA_FOLDER, args.data_dir),
+        root=os.path.join(DATA_FOLDER, args.data_dir).replace('\\', '/'),
         phase='train',
         split=args.splitname
     )
@@ -65,7 +65,7 @@ def main():
         num_workers=args.workers)
 
     testset = dset.CompositionDataset(
-        root=os.path.join(DATA_FOLDER, args.data_dir),
+        root=os.path.join(DATA_FOLDER, args.data_dir).replace('\\', '/'),
         phase=args.test_set,
         split=args.splitname
     )

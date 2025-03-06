@@ -1,10 +1,10 @@
 import argparse
 
-DATA_FOLDER = "F:/Project/CZSL/code/Disentangling-before-Composing"
+DATA_FOLDER = "F:/Project/CZSL/code/Disentangling-before-Composing/Disentangling-before-Composing"
 
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
-parser.add_argument('--config', default='configs/args.yml', help='path of the config file')
+parser.add_argument('--config', default='configs/zappos.yml', help='path of the config file')
 parser.add_argument('--dataset', default='zappos', help='utzappos|clothing|aoclevr')
 parser.add_argument('--data_dir', default='ut-zap50k', help='local path to data root dir from ' + DATA_FOLDER)
 parser.add_argument('--logpath', default=None, help='Path to dir where to logs are stored (test only)')
