@@ -1,2 +1,0 @@
---config
-configs/zappos.yml
