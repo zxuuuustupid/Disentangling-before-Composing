@@ -3,7 +3,7 @@ import torch
 from os.path import join as ospj
 
 # 数据集根目录
-DATASET_ROOT = "F:/Project/CZSL/code/Disentangling-before-Composing/Disentangling-before-Composing/dataset/bjtu_gearbox-c3f3"
+DATASET_ROOT = "F:/Project/CZSL/code/Disentangling-before-Composing/Disentangling-before-Composing/dataset/German"
 IMAGE_ROOT = ospj(DATASET_ROOT, "images")
 SPLIT_FOLDER = ospj(DATASET_ROOT, "compositional-split-natural")
 OUTPUT_FILE = ospj(DATASET_ROOT, "metadata_compositional-split-natural.t7")
