@@ -24,7 +24,12 @@ Disentangling before Composing: Learning Invariant Disentangled Features for Com
 
     Testing:
     python test.py --logpath LOG_DIR
-```
+```         
+5. Add complex experiments, change 2 path (create deep folders):    
+```      
+    experiment_name.yml --name      
+    experiment_name.yml --data_dir
+```      
 
 
 **Note:** Most of the code is an improvement based on https://github.com/ExplainableML/czsl.
