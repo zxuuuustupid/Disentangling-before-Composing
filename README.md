@@ -25,10 +25,16 @@ Disentangling before Composing: Learning Invariant Disentangled Features for Com
     Testing:
     python test.py --logpath LOG_DIR
 ```         
-5. Add complex experiments, change 2 path (create deep folders):    
+5. Add complex experiments, first create new folders and change:
+```
+    val_pairs.txt
+    train_pairs.txt
+    test_pairs.txt
+```
+Then change 2 paths (create deep folders):    
 ```      
-    experiment_name.yml --name      
-    experiment_name.yml --data_dir
+    process.py --split_name --DATASET_ROOT      
+    configs/your_experiment.yml --name --splitname
 ```      
 
 
