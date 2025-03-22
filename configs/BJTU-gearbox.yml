@@ -1,9 +1,9 @@
 ---
 experiment:
-  name: DBC/bjtu_gearbox-c3f3
+  name: DBC/BJTU-geabox
 dataset:
-  data_dir: dataset/bjtu_gearbox-c3f3
-  dataset: bjtu_gearbox-c3f3
+  data_dir: dataset/BJTU-gearbox
+  dataset: BJTU-gearbox
   splitname: compositional-split-natural
 model_params:
   emb_dim: 800
