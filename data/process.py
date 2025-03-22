@@ -1,12 +1,13 @@
 import os
 import torch
 from os.path import join as ospj
+split_name="compositional-split-natural3x9"
 
 # 数据集根目录
 DATASET_ROOT = "F:/Project/CZSL/code/Disentangling-before-Composing/Disentangling-before-Composing/dataset/BJTU-gearbox"
 IMAGE_ROOT = ospj(DATASET_ROOT, "images")
-SPLIT_FOLDER = ospj(DATASET_ROOT, "compositional-split-natural")
-OUTPUT_FILE = ospj(DATASET_ROOT, "metadata_compositional-split-natural.t7")
+SPLIT_FOLDER = ospj(DATASET_ROOT, split_name)
+OUTPUT_FILE = ospj(DATASET_ROOT, f"metadata_{split_name}.t7")
 
 
 # 解析 train/val/test_pairs.txt
