@@ -1,10 +1,10 @@
 ---
 experiment:
-  name: DBC/BJTU-gearbox/BJTU-gearbox3x7
+  name: DBC/BJTU-gearbox/BJTU-gearbox9x7
 dataset:
   data_dir: dataset/BJTU-gearbox
   dataset: BJTU-gearbox
-  splitname: compositional-split-natural3x7
+  splitname: compositional-split-natural9x7
 model_params:
   emb_dim: 800
 training:

@@ -1,7 +1,7 @@
 import os
 import torch
 from os.path import join as ospj
-split_name="compositional-split-natural3x7"
+split_name="compositional-split-natural9x7"
 
 # 数据集根目录
 DATASET_ROOT = "F:/Project/CZSL/code/Disentangling-before-Composing/Disentangling-before-Composing/dataset/BJTU-gearbox"
