@@ -27,12 +27,12 @@ def main():
     load_args(config, args)
 
     trainset = dset.CompositionDataset(
-        root=os.path.join(DATA_FOLDER,args.data_dir),
+        root=os.path.join(DATA_FOLDER, args.data_dir),
         phase='train',
         split=args.splitname
     )
     testset = dset.CompositionDataset(
-        root=os.path.join(DATA_FOLDER,args.data_dir),
+        root=os.path.join(DATA_FOLDER, args.data_dir),
         phase='test',
         split=args.splitname
     )
@@ -41,7 +41,6 @@ def main():
         batch_size=args.test_batch_size,
         shuffle=False,
         num_workers=args.workers)
-
 
     model = DBC(trainset, args)
     model = model.to(device)
@@ -61,51 +60,49 @@ def main():
 
 
 def test(model, testloader, evaluator, args):
- 
-        model.eval()
+    model.eval()
 
-        all_attr_gt, all_obj_gt, all_pair_gt, all_pred = [], [], [], []
+    all_attr_gt, all_obj_gt, all_pair_gt, all_pred = [], [], [], []
 
-        for idx, data in tqdm(enumerate(testloader), total=len(testloader), desc='Testing'):
-            data = [d.to(device) for d in data]
+    for idx, data in tqdm(enumerate(testloader), total=len(testloader), desc='Testing'):
+        data = [d.to(device) for d in data]
 
-            _, predictions= model(data, epoch=0)
+        _, predictions = model(data, epoch=0)
 
-            attr_truth, obj_truth, pair_truth = data[1], data[2], data[3]
+        attr_truth, obj_truth, pair_truth = data[1], data[2], data[3]
 
-            all_pred.append(predictions)
-            all_attr_gt.append(attr_truth)
-            all_obj_gt.append(obj_truth)
-            all_pair_gt.append(pair_truth)
+        all_pred.append(predictions)
+        all_attr_gt.append(attr_truth)
+        all_obj_gt.append(obj_truth)
+        all_pair_gt.append(pair_truth)
 
-        if args.cpu_eval:
-            all_attr_gt, all_obj_gt, all_pair_gt = torch.cat(all_attr_gt), torch.cat(all_obj_gt), torch.cat(all_pair_gt)
-        else:
-            all_attr_gt, all_obj_gt, all_pair_gt = torch.cat(all_attr_gt).to('cpu'), torch.cat(all_obj_gt).to(
-                'cpu'), torch.cat(all_pair_gt).to('cpu')
+    if args.cpu_eval:
+        all_attr_gt, all_obj_gt, all_pair_gt = torch.cat(all_attr_gt), torch.cat(all_obj_gt), torch.cat(all_pair_gt)
+    else:
+        all_attr_gt, all_obj_gt, all_pair_gt = torch.cat(all_attr_gt).to('cpu'), torch.cat(all_obj_gt).to(
+            'cpu'), torch.cat(all_pair_gt).to('cpu')
 
-        all_pred_dict = {}
-        if args.cpu_eval:
-            for k in all_pred[0].keys():
-                all_pred_dict[k] = torch.cat(
-                    [all_pred[i][k].to('cpu') for i in range(len(all_pred))])
-        else:
-            for k in all_pred[0].keys():
-                all_pred_dict[k] = torch.cat(
-                    [all_pred[i][k] for i in range(len(all_pred))])
+    all_pred_dict = {}
+    if args.cpu_eval:
+        for k in all_pred[0].keys():
+            all_pred_dict[k] = torch.cat(
+                [all_pred[i][k].to('cpu') for i in range(len(all_pred))])
+    else:
+        for k in all_pred[0].keys():
+            all_pred_dict[k] = torch.cat(
+                [all_pred[i][k] for i in range(len(all_pred))])
 
-        results = evaluator.score_model(all_pred_dict, all_obj_gt, bias=args.bias, topk=args.topk)
-        stats = evaluator.evaluate_predictions(results, all_attr_gt, all_obj_gt, all_pair_gt, all_pred_dict, topk=args.topk)
+    results = evaluator.score_model(all_pred_dict, all_obj_gt, bias=args.bias, topk=args.topk)
+    stats = evaluator.evaluate_predictions(results, all_attr_gt, all_obj_gt, all_pair_gt, all_pred_dict, topk=args.topk)
 
-        result = ''
-        for key in ['closed_attr_match','closed_obj_match','best_seen','best_unseen','best_hm','AUC']:
-            result = result + key + '  ' + str(round(stats[key], 4)) + '| '
+    result = ''
+    for key in ['closed_attr_match', 'closed_obj_match', 'best_seen', 'best_unseen', 'best_hm', 'AUC']:
+        result = result + key + '  ' + str(round(stats[key], 4)) + '| '
 
-        print('Final test results:',result)
+    print('Final test results:', result)
 
-        return results
+    return results
 
 
 if __name__ == '__main__':
     main()
-
