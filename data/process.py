@@ -2,10 +2,10 @@ import os
 import torch
 from os.path import join as ospj
 
-split_name = "compositional-split-natural9x5"
+split_name = "compositional-split-natural"
 
 # 数据集根目录
-DATASET_ROOT = "F:/Project/CZSL/code/Disentangling-before-Composing/Disentangling-before-Composing/dataset/BJTU-leftaxlebox"
+DATASET_ROOT = "F:/Project/CZSL/code/Disentangling-before-Composing/Disentangling-before-Composing/dataset/SF-ship"
 IMAGE_ROOT = ospj(DATASET_ROOT, "images")
 SPLIT_FOLDER = ospj(DATASET_ROOT, split_name)
 OUTPUT_FILE = ospj(DATASET_ROOT, f"metadata_{split_name}.t7")

@@ -1,17 +1,17 @@
 ---
 experiment:
-  name: DBC/bjtu_motor-c3f3
+  name: DBC/BJTU-motor/BJTU-motor9x5
 dataset:
-  data_dir: dataset/bjtu_motor-c3f3
-  dataset: bjtu_motor-c3f3
-  splitname: compositional-split-natural
+  data_dir: dataset/BJTU-motor
+  dataset: BJTU-motor
+  splitname: compositional-split-natural9x5
 model_params:
   emb_dim: 800
 training:
   batch_size: 32
   load:
   lr: 0.0001
-  max_epochs: 100
+  max_epochs: 50
   save_every: 10000
   test_batch_size: 32
   test_set: val

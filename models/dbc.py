@@ -110,7 +110,8 @@ class DBC(nn.Module):
         loss_obj = F.cross_entropy(img_do_p, objs)
         loss_pos_obj = F.cross_entropy(img_do_pp, objs)
 
-        loss = loss_attr + loss_obj + loss_pos_attr + loss_pos_obj + loss_neg_attr + loss_neg_obj
+        # loss = loss_attr + loss_obj + loss_pos_attr + loss_pos_obj + loss_neg_attr + loss_neg_obj
+        loss = loss_obj + loss_pos_obj + loss_neg_obj
 
         attr_one_hot = torch.nn.functional.one_hot(attrs, len(self.dset.attrs))
         obj_one_hot = torch.nn.functional.one_hot(objs, len(self.dset.objs))
@@ -137,7 +138,8 @@ class DBC(nn.Module):
         loss_rep_attr2 = F.cross_entropy(self.attr_clf(self.D['da'](pos_attr_img_feat * mask_attr)), attrs)
         loss_rep_obj2 = F.cross_entropy(self.obj_clf(self.D['do'](pos_obj_img_feat * mask_obj)), objs)
 
-        loss += self.lambda_rep * (loss_rep_attr1 + loss_rep_obj1 + loss_rep_attr2 + loss_rep_obj2)
+        # loss += self.lambda_rep * (loss_rep_attr1 + loss_rep_obj1 + loss_rep_attr2 + loss_rep_obj2)
+        loss += self.lambda_rep * (loss_rep_obj1 + loss_rep_obj2)
 
         attr_grads = []
         attr_env_loss = [loss_attr, loss_pos_attr]
@@ -161,7 +163,8 @@ class DBC(nn.Module):
             obj_penalty_value += (obj_grads[0][i] - obj_grads[1][i]).pow(2).sum()
         loss_grad_obj = obj_penalty_value
 
-        loss += self.lambda_grad * (loss_grad_attr + loss_grad_obj)
+        # loss += self.lambda_grad * (loss_grad_attr + loss_grad_obj)
+        loss += self.lambda_grad * loss_grad_obj
 
         recon_ao = self.decoder(torch.cat((img_do, img_da), dim=1))
         recon_aoo = self.decoder(torch.cat((neg_obj_img_do, pos_attr_img_da), dim=1))
@@ -170,6 +173,7 @@ class DBC(nn.Module):
         loss_rec_ao = self.recon_lossf(recon_ao, img_feat.detach())
         loss_rec_aoo = self.recon_lossf(recon_aoo, pos_attr_img_feat.detach())
         loss_rec_aao = self.recon_lossf(recon_aao, pos_obj_img_feat.detach())
+        # loss_rec = self.lambda_rec * (loss_rec_ao + loss_rec_aoo + loss_rec_aao)
         loss_rec = self.lambda_rec * (loss_rec_ao + loss_rec_aoo + loss_rec_aao)
 
         loss += loss_rec
@@ -199,7 +203,9 @@ class DBC(nn.Module):
                 loss_swap_attr += F.cross_entropy(self.attr_clf(self.D['da'](new_comp[i])), a_y[a[i]])
                 loss_swap_obj += F.cross_entropy(self.obj_clf(self.D['do'](new_comp[i])), o_y[o[i]])
 
-            loss_swap = self.lambda_res * (loss_swap_attr + loss_swap_obj)
+            # loss_swap = self.lambda_res * (loss_swap_attr + loss_swap_obj)
+            loss_swap = self.lambda_res * loss_swap_obj
+
             loss += loss_swap
 
         return loss, None
