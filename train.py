@@ -1,6 +1,7 @@
 import sys
 # sys.argv += ['--config', 'configs/BJTU-leftaxlebox.yml']
-sys.argv += ['--config', 'configs/BJTU-gearbox.yml']
+# sys.argv += ['--config', 'configs/BJTU-gearbox.yml']
+sys.argv += ['--config', 'configs/German.yml']
 
 import torch
 import torch.nn as nn

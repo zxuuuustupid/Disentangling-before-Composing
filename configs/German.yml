@@ -1,6 +1,6 @@
 ---
 experiment:
-  name: DBC/German
+  name: DBC/German/German
 dataset:
   data_dir: dataset/German
   dataset: German

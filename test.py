@@ -1,5 +1,5 @@
 import sys
-
+sys.argv += ['--logpath', 'logs/DBC/BJTU-gearbox/BJTU-gearbox9x5']
 import torch
 import torch.backends.cudnn as cudnn
 import numpy as np
