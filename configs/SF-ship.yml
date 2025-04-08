@@ -1,10 +1,10 @@
 ---
 experiment:
-  name: DBC/SF-ship/SF-ship0
+  name: DBC/SF-ship/SF-ship_all
 dataset:
   data_dir: dataset/SF-ship
   dataset: SF-ship
-  splitname: compositional-split-natural
+  splitname: compositional-split-natural_all
 model_params:
   emb_dim: 800
 training:

@@ -2,7 +2,7 @@ import os
 import torch
 from os.path import join as ospj
 
-split_name = "compositional-split-natural"
+split_name = "compositional-split-natural_all"
 
 # 数据集根目录
 DATASET_ROOT = "F:/Project/CZSL/code/Disentangling-before-Composing/Disentangling-before-Composing/dataset/SF-ship"
