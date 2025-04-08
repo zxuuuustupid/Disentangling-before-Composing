@@ -1,3 +1,6 @@
+import sys
+sys.argv += ['--config', 'configs/SF-ship.yml']
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -93,7 +96,7 @@ def main():
         start_epoch = checkpoint['epoch']
         print('Loaded model from ', args.load)
 
-    for epoch in tqdm(range(start_epoch, args.max_epochs + 1), desc='Current epoch'):
+    for epoch in tqdm(range(start_epoch, args.max_epochs + 1), desc='Current epoch',dynamic_ncols=True, file=sys.stdout):
         train(epoch, model, trainloader, optimizer, writer)
         if epoch % args.eval_val_every == 0:
             with torch.no_grad():
@@ -108,7 +111,7 @@ def train_normal(epoch, model, trainloader, optimizer, writer):
 
     train_loss = 0.0
 
-    for idx, data in tqdm(enumerate(trainloader), total=len(trainloader), desc='Training'):
+    for idx, data in tqdm(enumerate(trainloader), total=len(trainloader), desc='Training',dynamic_ncols=True, file=sys.stdout):
         data = [d.to(device) for d in data]
 
         loss, _ = model(data, epoch)
@@ -140,7 +143,7 @@ def test(epoch, model, testloader, evaluator, writer, args, logpath):
 
     all_attr_gt, all_obj_gt, all_pair_gt, all_pred = [], [], [], []
 
-    for idx, data in tqdm(enumerate(testloader), total=len(testloader), desc='Testing'):
+    for idx, data in tqdm(enumerate(testloader), total=len(testloader), desc='Testing',dynamic_ncols=True, file=sys.stdout):
         data = [d.to(device) for d in data]
 
         _, predictions = model(data, epoch)

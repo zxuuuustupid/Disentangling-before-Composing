@@ -1,6 +1,6 @@
 ---
 experiment:
-  name: DBC/SF-ship
+  name: DBC/SF-ship/SF-ship0
 dataset:
   data_dir: dataset/SF-ship
   dataset: SF-ship
