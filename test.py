@@ -66,7 +66,7 @@ def test(model, testloader, evaluator, args):
 
     all_attr_gt, all_obj_gt, all_pair_gt, all_pred = [], [], [], []
 
-    for idx, data in tqdm(enumerate(testloader), total=len(testloader), desc='Testing',dynamic_ncols=True, file=sys.stdout):
+    for idx, data in tqdm(enumerate(testloader), total=len(testloader), desc='Testing',dynamic_ncols=True  ):
         data = [d.to(device) for d in data]
 
         _, predictions = model(data, epoch=0)

@@ -5,7 +5,7 @@ from os.path import join as ospj
 split_name = "compositional-split-natural"
 
 # 数据集根目录
-DATASET_ROOT = "F:/Project/CZSL/code/Disentangling-before-Composing/Disentangling-before-Composing/dataset/Canada"
+DATASET_ROOT = "F:/Project/CZSL/code/Disentangling-before-Composing/Disentangling-before-Composing/dataset/German"
 IMAGE_ROOT = ospj(DATASET_ROOT, "images")
 SPLIT_FOLDER = ospj(DATASET_ROOT, split_name)
 OUTPUT_FILE = ospj(DATASET_ROOT, f"metadata_{split_name}.t7")
