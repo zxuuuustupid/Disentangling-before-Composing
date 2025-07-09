@@ -1,6 +1,9 @@
 import torch
+import time
 import torch.nn as nn
 import torch.nn.functional as F
+from cryptography.hazmat.primitives.asymmetric.dsa import DSAPublicKey
+
 from utils.common import MLP, Decoder
 import numpy as np
 import torch.autograd as autograd
@@ -11,6 +14,7 @@ device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 
 class Disentangler(nn.Module):
+    # [Batch, Dim] → Linear → BatchNorm → ReLU → Dropout → 输出 [Batch, Dim]
     def __init__(self, args):
         super(Disentangler, self).__init__()
         self.fc1 = nn.Linear(args.emb_dim, args.emb_dim)
@@ -31,15 +35,36 @@ class DBC(nn.Module):
 
         def get_all_ids(relevant_pairs):
             attrs, objs = zip(*relevant_pairs)
+
+            # print(relevant_pairs)
+            # time.sleep(5)
+            # [('Load1', 'Health'), ('Load1', 'IR'), ('Load1', 'OR'), ('Load2', 'Health'), ('Load2', 'IR'),
+            #  ('Load2', 'OR'), ('Load3', 'Health'), ('Load3', 'IR'), ('Load3', 'OR'), ('Load4', 'Health'),
+            #  ('Load4', 'IR'), ('Load4', 'OR')]
+
             attrs = [dset.attr2idx[attr] for attr in attrs]
             objs = [dset.obj2idx[obj] for obj in objs]
             pairs = [a for a in range(len(relevant_pairs))]
             attrs = torch.LongTensor(attrs).to(device)
             objs = torch.LongTensor(objs).to(device)
             pairs = torch.LongTensor(pairs).to(device)
+
+            # time.sleep(5)
+            # print(attrs, objs, pairs)
+            # tensor([0, 0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 3], device='cuda:0')
+            # tensor([0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2], device='cuda:0')
+            # tensor([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], device='cuda:0')
+
             return attrs, objs, pairs
 
         self.train_attrs, self.train_objs, self.train_pairs = get_all_ids(self.dset.train_pairs)
+
+        # print(self.train_attrs, self.train_objs, self.train_pairs)
+        # # time.sleep(5)
+        # tensor([0, 0, 0, 1, 1, 1, 2, 2, 2, 3, 3], device='cuda:0')
+        # tensor([0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1], device='cuda:0')
+        # tensor([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], device='cuda:0')
+
         self.val_attrs, self.val_objs, self.val_pairs = get_all_ids(self.dset.pairs)
 
         self.train_forward = self.train_forward_closed
@@ -59,6 +84,8 @@ class DBC(nn.Module):
         self.D = nn.ModuleDict({'da': Disentangler(args), 'do': Disentangler(args)})
 
         self.attr_clf = MLP(args.emb_dim, len(dset.attrs), 1, relu=False)
+        # print(len(dset.attrs))
+        # 4
         self.obj_clf = MLP(args.emb_dim, len(dset.objs), 1, relu=False)
 
         self.drop = args.drop
@@ -75,6 +102,7 @@ class DBC(nn.Module):
         img, attrs, objs, pairs = x[0], x[1], x[2], x[3]
         pos_attr_img, neg_objs, pos_obj_img, neg_attrs = x[4], x[5], x[6], x[7]
         neg_obj_pairs, neg_attr_pairs = x[10], x[11]
+
 
         img = self.feat_extractor(img)[0]
         img = self.img_embedder(img)
@@ -94,6 +122,7 @@ class DBC(nn.Module):
         pos_attr_img_da = self.D['da'](pos_attr_img_feat)
         pos_obj_img_do = self.D['do'](pos_obj_img_feat)
 
+# TODO
         neg_attr_img_da = self.D['da'](pos_obj_img_feat)
         neg_obj_img_do = self.D['do'](pos_attr_img_feat)
 
@@ -112,6 +141,9 @@ class DBC(nn.Module):
 
         # loss = loss_attr + loss_obj + loss_pos_attr + loss_pos_obj + loss_neg_attr + loss_neg_obj
         loss = loss_obj + loss_pos_obj + loss_neg_obj
+
+
+# C 掩码部分 loss rep
 
         attr_one_hot = torch.nn.functional.one_hot(attrs, len(self.dset.attrs))
         obj_one_hot = torch.nn.functional.one_hot(objs, len(self.dset.objs))
@@ -141,6 +173,8 @@ class DBC(nn.Module):
         # loss += self.lambda_rep * (loss_rep_attr1 + loss_rep_obj1 + loss_rep_attr2 + loss_rep_obj2)
         loss += self.lambda_rep * (loss_rep_obj1 + loss_rep_obj2)
 
+
+# loss grad
         attr_grads = []
         attr_env_loss = [loss_attr, loss_pos_attr]
         attr_network = nn.Sequential(self.D['da'], self.attr_clf)
@@ -166,6 +200,8 @@ class DBC(nn.Module):
         # loss += self.lambda_grad * (loss_grad_attr + loss_grad_obj)
         loss += self.lambda_grad * loss_grad_obj
 
+
+# loss rec
         recon_ao = self.decoder(torch.cat((img_do, img_da), dim=1))
         recon_aoo = self.decoder(torch.cat((neg_obj_img_do, pos_attr_img_da), dim=1))
         recon_aao = self.decoder(torch.cat((pos_obj_img_do, neg_attr_img_da), dim=1))
@@ -178,6 +214,8 @@ class DBC(nn.Module):
 
         loss += loss_rec
 
+
+# Core
         if epoch >= self.res_epoch:
             attr_feat = [img_da, pos_attr_img_da, neg_attr_img_da]
             obj_feat = [img_do, pos_obj_img_do, neg_obj_img_do]
