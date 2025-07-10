@@ -140,18 +140,22 @@ class Evaluator:
         # this excludes the pairs from set not in evaluation
         mask = self.closed_mask.repeat(scores.shape[0], 1)
         closed_scores = scores.clone()
-        closed_scores[~mask] = -1e10 
+        # closed_scores[~mask] = -1e10
+        closed_scores[~mask] = 0
         closed_orig_scores = orig_scores.clone()
-        closed_orig_scores[~mask] = -1e10
+        # closed_orig_scores[~mask] = -1e10
+        closed_orig_scores[~mask] = 0
         results.update({'closed': get_pred_from_scores(closed_scores, topk)})
         results.update({'unbiased_closed': get_pred_from_scores(closed_orig_scores, topk)})
 
         # Object_oracle setting - set the score to -1e10 for all pairs where the true object does Not participate, can also use the closed score
         mask = self.oracle_obj_mask[obj_truth]
         oracle_obj_scores = scores.clone()
-        oracle_obj_scores[~mask] = -1e10
+        # oracle_obj_scores[~mask] = -1e10
+        oracle_obj_scores[~mask] = 0
         oracle_obj_scores_unbiased = orig_scores.clone()
-        oracle_obj_scores_unbiased[~mask] = -1e10
+        # oracle_obj_scores_unbiased[~mask] = -1e10
+        oracle_obj_scores_unbiased[~mask] = 0
         results.update({'object_oracle': get_pred_from_scores(oracle_obj_scores, 1)})
         results.update({'object_oracle_unbiased': get_pred_from_scores(oracle_obj_scores_unbiased, 1)})
 
@@ -205,7 +209,8 @@ class Evaluator:
 
         mask = self.closed_mask.repeat(scores.shape[0], 1)
         closed_scores = scores.clone()
-        closed_scores[~mask] = -1e10 
+        # closed_scores[~mask] = -1e10
+        closed_scores[~mask] = 0
 
         _, pair_pred = closed_scores.topk(topk, dim = 1) #sort returns indices of k largest values
         pair_pred = pair_pred.contiguous().view(-1)
@@ -235,8 +240,12 @@ class Evaluator:
         def _process(_scores):
             # Top k pair accuracy
             # Attribute, object and pair
+            # print(_scores[1])
+            # print(obj_truth.unsqueeze(1))
             attr_match = (attr_truth.unsqueeze(1).repeat(1, topk) == _scores[0][:, :topk])
             obj_match = (obj_truth.unsqueeze(1).repeat(1, topk) == _scores[1][:, :topk])
+            # print(attr_match, obj_match)
+
 
             # Match of object pair
             match = (attr_match * obj_match).any(1).float()
@@ -246,6 +255,7 @@ class Evaluator:
             seen_match = match[seen_ind]
             unseen_match = match[unseen_ind]            
             seen_score, unseen_score = torch.ones(512,5), torch.ones(512,5)
+
 
             return attr_match, obj_match, match, seen_match, unseen_match, \
             torch.Tensor(seen_score+unseen_score), torch.Tensor(seen_score), torch.Tensor(unseen_score)
@@ -321,18 +331,23 @@ class Evaluator:
         for key in stats:
             stats[key] = float(stats[key].mean())
 
-        harmonic_mean = hmean([seen_accuracy, unseen_accuracy], axis = 0)
-        max_hm = np.max(harmonic_mean)
-        idx = np.argmax(harmonic_mean)
-        if idx == len(biaslist):
-            bias_term = 1e3
-        else:
-            bias_term = biaslist[idx]
-        stats['biasterm'] = float(bias_term)
+        # print("seen_accuracy:", seen_accuracy)
+        # print("unseen_accuracy:", unseen_accuracy)
+        # print("bad values (seen):", seen_accuracy[seen_accuracy < 0])
+        # print("bad values (unseen):", unseen_accuracy[unseen_accuracy < 0])
+
+        # harmonic_mean = hmean([seen_accuracy, unseen_accuracy], axis = 0)
+        # max_hm = np.max(harmonic_mean)
+        # idx = np.argmax(harmonic_mean)
+        # if idx == len(biaslist):
+        #     bias_term = 1e3
+        # else:
+        #     bias_term = biaslist[idx]
+        # stats['biasterm'] = float(bias_term)
         stats['best_unseen'] = np.max(unseen_accuracy)
-        stats['best_seen'] = np.max(seen_accuracy)
+        # stats['best_seen'] = np.max(seen_accuracy)
         stats['AUC'] = area
-        stats['hm_unseen'] = unseen_accuracy[idx]
-        stats['hm_seen'] = seen_accuracy[idx]
-        stats['best_hm'] = max_hm
+        # stats['hm_unseen'] = unseen_accuracy[idx]
+        # stats['hm_seen'] = seen_accuracy[idx]
+        # stats['best_hm'] = max_hm
         return stats

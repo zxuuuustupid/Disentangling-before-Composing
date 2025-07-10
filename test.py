@@ -1,5 +1,6 @@
 import sys
-sys.argv += ['--logpath', 'logs/DBC/BJTU-motor/BJTU-motor9x5']
+sys.argv += ['--logpath', 'logs/DBC/BJTU-gearbox/BJTU-gearbox9x5']
+# sys.argv += ['--logpath', 'logs/DBC/German/German']
 import torch
 import torch.backends.cudnn as cudnn
 import numpy as np
@@ -47,7 +48,7 @@ def main():
     model = DBC(trainset, args)
     model = model.to(device)
 
-    args.load = ospj(logpath, 'ckpt_best_hm.t7')
+    args.load = ospj(logpath, 'ckpt_best_obj.t7')
     # args.load = ospj(logpath, 'ckpt_best_auc.t7')
     # args.load = ospj(logpath, 'ckpt_best_unseen.t7')
 
@@ -96,9 +97,12 @@ def test(model, testloader, evaluator, args):
 
     results = evaluator.score_model(all_pred_dict, all_obj_gt, bias=args.bias, topk=args.topk)
     stats = evaluator.evaluate_predictions(results, all_attr_gt, all_obj_gt, all_pair_gt, all_pred_dict, topk=args.topk)
+    # print(stats)
+    # print(results)
 
     result = ''
-    for key in ['closed_attr_match', 'closed_obj_match', 'best_seen', 'best_unseen', 'best_hm', 'AUC']:
+    for key in ['closed_attr_match', 'closed_obj_match']:
+        # print(round(stats[key], 4))
         result = result + key + '  ' + str(round(stats[key], 4)) + '| '
 
     print('Final test results:', result)

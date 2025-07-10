@@ -1,12 +1,12 @@
 ---
 experiment:
-  name: DBC/BJTU-motor/BJTU-motor9x5
+  name: DBC/BJTU-motor/BJTU-motor9x5-25
 dataset:
   data_dir: dataset/BJTU-motor
   dataset: BJTU-motor
-  splitname: compositional-split-natural9x5
+  splitname: compositional-split-natural9x5-25
 model_params:
-  emb_dim: 800
+  emb_dim: 300
 training:
   batch_size: 32
   load:
