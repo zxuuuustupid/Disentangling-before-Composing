@@ -4,9 +4,9 @@ experiment:
 dataset:
   data_dir: dataset/Canada
   dataset: Canada
-  splitname: compositional-split-natural
+  splitname: compositional-split-natural-5
 model_params:
-  emb_dim: 800
+  emb_dim: 300
 training:
   batch_size: 32
   load:

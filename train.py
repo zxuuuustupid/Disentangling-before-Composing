@@ -4,10 +4,11 @@ import sys
 
 # sys.argv += ['--config', 'configs/BJTU-leftaxlebox.yml']
 # sys.argv += ['--config', 'configs/BJTU-gearbox.yml']
-sys.argv += ['--config', 'configs/SF-ship.yml']
+# sys.argv += ['--config', 'configs/SF-ship.yml']
 # sys.argv += ['--config', 'configs/BJTU-motor.yml']
-# sys.argv += ['--config', 'configs/German.yml']
+sys.argv += ['--config', 'configs/German.yml']
 # sys.argv += ['--config', 'configs/Canada.yml']
+# sys.argv += ['--config', 'configs/SWJTU.yml']
 
 import torch
 import torch.nn as nn
@@ -210,12 +211,18 @@ def test(epoch, model, testloader, evaluator, writer, args, logpath):
     results = evaluator.score_model(all_pred_dict, all_obj_gt, bias=args.bias, topk=args.topk)
     stats = evaluator.evaluate_predictions(results, all_attr_gt, all_obj_gt, all_pair_gt, all_pred_dict, topk=args.topk)
     # print(stats.keys())
+    # dict_keys(['obj_oracle_match', 'obj_oracle_match_unbiased', 'closed_attr_match', 'closed_obj_match', 'closed_m
+    #            atch', 'closed_seen_match', 'closed_unseen_match', 'closed_ca', 'closed_seen_ca', 'closed_unseen_ca', '
+    #            closed_
+    #            ub_attr_match', 'closed_ub_obj_match', 'closed_ub_match', 'closed_ub_seen_match', 'closed_ub_unseen_match
+    #            ', 'closed_ub_ca', 'closed_ub_seen_ca', 'closed_ub_unseen_ca', 'best_unseen', 'AUC'])
+
 
     stats['a_epoch'] = epoch
 
     result = ''
-
-    for key in ['closed_attr_match','closed_obj_match']:
+    # print(stats['closed_seen_match'])
+    for key in ['closed_attr_match','closed_obj_match','closed_seen_obj_match','closed_unseen_obj_match']:
         writer.add_scalar(key, stats[key], epoch)
         result = result + key + '  ' + str(round(stats[key], 4)) + '| '
 

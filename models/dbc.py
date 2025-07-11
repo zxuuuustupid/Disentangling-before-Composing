@@ -125,18 +125,17 @@ class DBC(nn.Module):
         neg_attr_img_da = self.D['da'](pos_obj_img_feat)
         neg_obj_img_do = self.D['do'](pos_attr_img_feat)
 
+        # img_da_p = self.attr_clf(img_da)
+        # img_da_pp = self.attr_clf(pos_attr_img_da)
+        # img_do_p = self.obj_clf(img_do)
+        # img_do_pp = self.obj_clf(pos_obj_img_do)
+
         loss_neg_attr = F.cross_entropy(self.attr_clf(neg_attr_img_da), neg_attrs)
         loss_neg_obj = F.cross_entropy(self.obj_clf(neg_obj_img_do), neg_objs)
-
-        img_da_p = self.attr_clf(img_da)
-        img_da_pp = self.attr_clf(pos_attr_img_da)
-        img_do_p = self.obj_clf(img_do)
-        img_do_pp = self.obj_clf(pos_obj_img_do)
-
-        loss_attr = F.cross_entropy(img_da_p, attrs)
-        loss_pos_attr = F.cross_entropy(img_da_pp, attrs)
-        loss_obj = F.cross_entropy(img_do_p, objs)
-        loss_pos_obj = F.cross_entropy(img_do_pp, objs)
+        loss_attr = F.cross_entropy(self.attr_clf(img_da), attrs)
+        loss_pos_attr = F.cross_entropy(self.attr_clf(pos_attr_img_da), attrs)
+        loss_obj = F.cross_entropy(self.obj_clf(img_do), objs)
+        loss_pos_obj = F.cross_entropy(self.obj_clf(pos_obj_img_do), objs)
 
         loss = 0.05*loss_attr + loss_obj + 0.05*loss_pos_attr + loss_pos_obj + 0.05*loss_neg_attr + loss_neg_obj
         # loss = loss_obj + loss_pos_obj + loss_neg_obj

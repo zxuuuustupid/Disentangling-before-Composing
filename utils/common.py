@@ -27,7 +27,7 @@ class MLP(nn.Module):
             else:
                 outgoing = layers.pop(0)
             mod.append(nn.Linear(incoming, outgoing, bias = bias))
-            
+
             incoming = outgoing
             if norm:
                 mod.append(nn.LayerNorm(outgoing))
@@ -43,7 +43,7 @@ class MLP(nn.Module):
             mod.append(nn.ReLU(inplace = True))
             # mod.append(nn.LeakyReLU(inplace=True, negative_slope=0.2))
         self.mod = nn.Sequential(*mod)
-    
+
     def forward(self, x):
         return self.mod(x)
 
@@ -132,11 +132,11 @@ class Evaluator:
         scores[~mask] += bias # Add bias to test pairs
 
         # Unbiased setting
-        
+
         # Open world setting --no mask, all pairs of the dataset
         results.update({'open': get_pred_from_scores(scores, topk)})
         results.update({'unbiased_open': get_pred_from_scores(orig_scores, topk)})
-        # Closed world setting - set the score for all Non test pairs to -1e10, 
+        # Closed world setting - set the score for all Non test pairs to -1e10,
         # this excludes the pairs from set not in evaluation
         mask = self.closed_mask.repeat(scores.shape[0], 1)
         closed_scores = scores.clone()
@@ -202,7 +202,7 @@ class Evaluator:
         '''
         Wrapper function to call generate_predictions for manifold models
         '''
-        
+
         results = {}
         mask = self.seen_mask.repeat(scores.shape[0],1) # Repeat mask along pairs dimension
         scores[~mask] += bias # Add bias to test pairs
@@ -226,7 +226,7 @@ class Evaluator:
 
         pairs = list(
             zip(list(attr_truth.numpy()), list(obj_truth.numpy())))
-        
+
 
         seen_ind, unseen_ind = [], []
         for i in range(len(attr_truth)):
@@ -235,7 +235,7 @@ class Evaluator:
             else:
                 unseen_ind.append(i)
 
-        
+
         seen_ind, unseen_ind = torch.LongTensor(seen_ind), torch.LongTensor(unseen_ind)
         def _process(_scores):
             # Top k pair accuracy
@@ -253,16 +253,25 @@ class Evaluator:
             obj_match = obj_match.any(1).float()
             # Match of seen and unseen pairs
             seen_match = match[seen_ind]
-            unseen_match = match[unseen_ind]            
+            # print("seen match",seen_match)
+            # tensor([1., 1., 1., ..., 1., 1., 1.])
+            unseen_match = match[unseen_ind]
             seen_score, unseen_score = torch.ones(512,5), torch.ones(512,5)
+
+            # Object分类准确率（在组合的seen/unseen范围上分别统计）
+            seen_obj_match = obj_match[seen_ind].mean()
+            unseen_obj_match = obj_match[unseen_ind].mean()
 
 
             return attr_match, obj_match, match, seen_match, unseen_match, \
-            torch.Tensor(seen_score+unseen_score), torch.Tensor(seen_score), torch.Tensor(unseen_score)
+            torch.Tensor(seen_score+unseen_score), torch.Tensor(seen_score), torch.Tensor(unseen_score),\
+            seen_obj_match, unseen_obj_match
 
         def _add_to_dict(_scores, type_name, stats):
-            base = ['_attr_match', '_obj_match', '_match', '_seen_match', '_unseen_match', '_ca', '_seen_ca', '_unseen_ca']
+            base = ['_attr_match', '_obj_match', '_match', '_seen_match', '_unseen_match', '_ca', '_seen_ca', '_unseen_ca','_seen_obj_match','_unseen_obj_match']
             for val, name in zip(_scores, base):
+                # if name=='_seen_match':
+                #     print('_seen_match', val)
                 stats[type_name + name] = val
 
         ##################### Match in places where corrent object
@@ -328,9 +337,11 @@ class Evaluator:
         seen_accuracy, unseen_accuracy = np.array(seen_accuracy), np.array(unseen_accuracy)
         area = np.trapz(seen_accuracy, unseen_accuracy)
 
+        # print('Before',stats['closed_seen_match'])
         for key in stats:
             stats[key] = float(stats[key].mean())
 
+        # print('After',stats['closed_seen_match'])
         # print("seen_accuracy:", seen_accuracy)
         # print("unseen_accuracy:", unseen_accuracy)
         # print("bad values (seen):", seen_accuracy[seen_accuracy < 0])
