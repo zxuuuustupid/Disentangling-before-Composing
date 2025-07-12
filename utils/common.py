@@ -2,6 +2,10 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import numpy as np
+from collections import defaultdict
+
+# import numpy as np
+from collections import defaultdict
 import copy
 from scipy.stats import hmean
 
@@ -361,4 +365,69 @@ class Evaluator:
         # stats['hm_unseen'] = unseen_accuracy[idx]
         # stats['hm_seen'] = seen_accuracy[idx]
         # stats['best_hm'] = max_hm
-        return stats
+
+
+
+        attr_list = attr_truth.cpu().numpy()
+        obj_list = obj_truth.cpu().numpy()
+        obj_pred = predictions['closed'][1][:, 0].cpu().numpy()  # top-1 obj 预测
+
+        # 构造 seen/unseen 掩码
+        pair_tuples = list(zip(attr_list, obj_list))
+        seen_mask = np.array([tuple_ in self.train_pairs for tuple_ in pair_tuples])
+        unseen_mask = ~seen_mask
+
+        # 初始化容器：{attr_id: [正确数, 总数]} 结构
+        def init_dict():
+            return defaultdict(lambda: [0, 0])  # [正确数，总数]
+
+        acc_total = init_dict()
+        acc_seen = init_dict()
+        acc_unseen = init_dict()
+
+        for attr, obj_gt, obj_pd, seen_flag in zip(attr_list, obj_list, obj_pred, seen_mask):
+            correct = (obj_gt == obj_pd)
+            acc_total[attr][1] += 1
+            acc_total[attr][0] += int(correct)
+
+            if seen_flag:
+                acc_seen[attr][1] += 1
+                acc_seen[attr][0] += int(correct)
+            else:
+                acc_unseen[attr][1] += 1
+                acc_unseen[attr][0] += int(correct)
+
+        # 转为二维 numpy 数组：attr_id | seen_acc | unseen_acc | total_acc
+        attr_ids = sorted(set(attr_list))
+        acc_array = []
+        for aid in attr_ids:
+            s_acc = acc_seen[aid][0] / acc_seen[aid][1] if acc_seen[aid][1] > 0 else np.nan
+            u_acc = acc_unseen[aid][0] / acc_unseen[aid][1] if acc_unseen[aid][1] > 0 else np.nan
+            t_acc = acc_total[aid][0] / acc_total[aid][1] if acc_total[aid][1] > 0 else np.nan
+            acc_array.append([aid, s_acc, u_acc, t_acc])
+
+        acc_array = np.array(acc_array)  # shape: (num_attr, 4)
+# hunxiaojvzhen
+
+        num_obj = self.dset.num_objs
+        confusion_count = defaultdict(lambda: np.zeros((num_obj, num_obj), dtype=int))
+
+        # 获取真实和预测值（只关注 obj）
+        obj_list = obj_truth.tolist()
+        obj_pred = predictions['closed'][1][:, 0].tolist()  # closed 模式下 top-1 预测的 object
+        attr_list = attr_truth.tolist()
+
+        # 构建每个属性下的混淆矩阵（原始数量）
+        for attr, obj_gt, obj_pd in zip(attr_list, obj_list, obj_pred):
+            confusion_count[attr][obj_gt, obj_pd] += 1
+
+        confusion_accuracy = {}
+
+        for attr, mat in confusion_count.items():
+            with np.errstate(divide='ignore', invalid='ignore'):
+                row_sums = mat.sum(axis=1, keepdims=True)
+                acc_mat = np.divide(mat, row_sums, where=row_sums != 0)
+            confusion_accuracy[attr] = acc_mat
+
+        return stats, acc_array, confusion_accuracy
+

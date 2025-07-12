@@ -1,12 +1,13 @@
 import sys
+import os
+import csv
 
 # from PyQt5.QtCore.QProcess import state
 
 # sys.argv += ['--config', 'configs/BJTU-leftaxlebox.yml']
 # sys.argv += ['--config', 'configs/BJTU-gearbox.yml']
-# sys.argv += ['--config', 'configs/SF-ship.yml']
 # sys.argv += ['--config', 'configs/BJTU-motor.yml']
-sys.argv += ['--config', 'configs/German.yml']
+# sys.argv += ['--config', 'configs/German.yml']
 # sys.argv += ['--config', 'configs/Canada.yml']
 # sys.argv += ['--config', 'configs/SWJTU.yml']
 
@@ -209,7 +210,7 @@ def test(epoch, model, testloader, evaluator, writer, args, logpath):
             # print(all_pred_dict[k].shape)[12000]
 
     results = evaluator.score_model(all_pred_dict, all_obj_gt, bias=args.bias, topk=args.topk)
-    stats = evaluator.evaluate_predictions(results, all_attr_gt, all_obj_gt, all_pair_gt, all_pred_dict, topk=args.topk)
+    stats, acc_array, confusion_accuracy = evaluator.evaluate_predictions(results, all_attr_gt, all_obj_gt, all_pair_gt, all_pred_dict, topk=args.topk)
     # print(stats.keys())
     # dict_keys(['obj_oracle_match', 'obj_oracle_match_unbiased', 'closed_attr_match', 'closed_obj_match', 'closed_m
     #            atch', 'closed_seen_match', 'closed_unseen_match', 'closed_ca', 'closed_seen_ca', 'closed_unseen_ca', '
@@ -222,7 +223,7 @@ def test(epoch, model, testloader, evaluator, writer, args, logpath):
 
     result = ''
     # print(stats['closed_seen_match'])
-    for key in ['closed_attr_match','closed_obj_match','closed_seen_obj_match','closed_unseen_obj_match']:
+    for key in ['closed_obj_match','closed_seen_obj_match','closed_unseen_obj_match']:
         writer.add_scalar(key, stats[key], epoch)
         result = result + key + '  ' + str(round(stats[key], 4)) + '| '
 
@@ -231,6 +232,30 @@ def test(epoch, model, testloader, evaluator, writer, args, logpath):
 
     if epoch > 0 and epoch % args.save_every == 0:
         save_checkpoint(epoch)
+
+    if epoch == args.max_epochs:
+        # 构造结果行
+        final_result_row = {
+            'experiment': args.name,
+            'closed_obj_match': round(stats['closed_obj_match'], 4),
+            'closed_seen_obj_match': round(stats['closed_seen_obj_match'], 4),
+            'closed_unseen_obj_match': round(stats['closed_unseen_obj_match'], 4)
+        }
+
+        # 创建 result 目录
+        result_dir = os.path.join(os.getcwd(), 'result')
+        os.makedirs(result_dir, exist_ok=True)
+        result_csv = os.path.join(result_dir, 'results.csv')
+
+        # 写入 CSV（追加或创建）
+        write_header = not os.path.exists(result_csv)
+        with open(result_csv, 'a', newline='') as f:
+            writer = csv.DictWriter(f, fieldnames=final_result_row.keys())
+            if write_header:
+                writer.writeheader()
+            writer.writerow(final_result_row)
+
+
     # if stats['AUC'] > best_auc:
     #     best_auc = stats['AUC']
     #     print('New best AUC ', best_auc)
@@ -259,7 +284,52 @@ def test(epoch, model, testloader, evaluator, writer, args, logpath):
 
 
 if __name__ == '__main__':
-    try:
-        main()
-    except KeyboardInterrupt:
-        print('Best obj achieved is ', best_obj)
+    config_list = [
+        'configs/German.yml',
+        'configs/BJTU-leftaxlebox.yml',
+        'configs/BJTU-gearbox.yml',
+        'configs/BJTU-motor.yml',
+        'configs/Canada.yml',
+        'configs/SWJTU.yml',
+        'configs/SF-ship.yml'
+    ]
+
+    # 每个数据集对应的 split ID 列表
+    split_id_map = {
+        'BJTU':   [8, 12, 20, 28],
+        'German': [3, 6, 9],
+        'SWJTU':  [6, 12, 18],
+        'Canada': [5, 10, 15]
+    }
+
+    for config_file in config_list:
+        # 在 split_id_map 中找到对应的 split ids
+        matched = False
+        for key in split_id_map:
+            if key in config_file:
+                split_ids = split_id_map[key]
+                matched = True
+                break
+        if not matched:
+            print(f'❌ 配置文件 {config_file} 没有匹配到任何 split_id，请检查文件名是否包含 BJTU、German、SWJTU 或 Canada')
+            sys.exit(1)
+
+        for split_id in split_ids:
+            # 设置 sys.argv 以模拟命令行参数传入
+            sys.argv = [sys.argv[0], '--config', config_file]
+
+            args = parser.parse_args()
+            load_args(config_file, args)
+
+            # 修改 splitname 和实验名
+            args.splitname = f'compositional-split-natural-{split_id}'
+            args.name = f'{args.name}_s{split_id}'
+
+            print(f'\n================ Running config: {config_file} | split: {args.splitname} ================\n')
+
+            try:
+                main()
+            except KeyboardInterrupt:
+                print('Early stopped for', config_file)
+            except Exception as e:
+                print(f'Error running config {config_file}, split {split_id}: {e}')
