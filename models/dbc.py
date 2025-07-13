@@ -125,10 +125,10 @@ class DBC(nn.Module):
         neg_attr_img_da = self.D['da'](pos_obj_img_feat)
         neg_obj_img_do = self.D['do'](pos_attr_img_feat)
 
-        # img_da_p = self.attr_clf(img_da)
-        # img_da_pp = self.attr_clf(pos_attr_img_da)
-        # img_do_p = self.obj_clf(img_do)
-        # img_do_pp = self.obj_clf(pos_obj_img_do)
+        img_da_p = self.attr_clf(img_da)
+        img_da_pp = self.attr_clf(pos_attr_img_da)
+        img_do_p = self.obj_clf(img_do)
+        img_do_pp = self.obj_clf(pos_obj_img_do)
 
         loss_neg_attr = F.cross_entropy(self.attr_clf(neg_attr_img_da), neg_attrs)
         loss_neg_obj = F.cross_entropy(self.obj_clf(neg_obj_img_do), neg_objs)
@@ -137,66 +137,66 @@ class DBC(nn.Module):
         loss_obj = F.cross_entropy(self.obj_clf(img_do), objs)
         loss_pos_obj = F.cross_entropy(self.obj_clf(pos_obj_img_do), objs)
 
-        loss = 0.05*loss_attr + loss_obj + 0.05*loss_pos_attr + loss_pos_obj + 0.05*loss_neg_attr + loss_neg_obj
+        loss = 0.1*loss_attr + loss_obj + 0.1*loss_pos_attr + loss_pos_obj + 0.1*loss_neg_attr + loss_neg_obj
         # loss = loss_obj + loss_pos_obj + loss_neg_obj
 
 
 # C 掩码部分 loss rep
 
-        # attr_one_hot = torch.nn.functional.one_hot(attrs, len(self.dset.attrs))
-        # obj_one_hot = torch.nn.functional.one_hot(objs, len(self.dset.objs))
-        #
-        # img_da_g = autograd.grad((img_da_p * attr_one_hot).sum(), img_feat, retain_graph=True)[0]
-        # img_da_g_p = autograd.grad((img_da_pp * attr_one_hot).sum(), pos_attr_img_feat, retain_graph=True)[0]
-        #
-        # img_do_g = autograd.grad((img_do_p * obj_one_hot).sum(), img_feat, retain_graph=True)[0]
-        # img_do_g_p = autograd.grad((img_do_pp * obj_one_hot).sum(), pos_obj_img_feat, retain_graph=True)[0]
-        #
-        # diff_attr = torch.abs(img_da_g - img_da_g_p)
-        # perct_attr = torch.sort(diff_attr)[0][:, int(self.drop * self.emb_dim)]
-        # perct_attr = perct_attr.unsqueeze(1).repeat(1, self.emb_dim)
-        # mask_attr = diff_attr.lt(perct_attr.to(device)).float()
-        #
-        # diff_obj = torch.abs(img_do_g - img_do_g_p)
-        # perct_obj = torch.sort(diff_obj)[0][:, int(self.drop * self.emb_dim)]
-        # perct_obj = perct_obj.unsqueeze(1).repeat(1, self.emb_dim)
-        # mask_obj = diff_obj.lt(perct_obj.to(device)).float()
-        #
-        # loss_rep_attr1 = F.cross_entropy(self.attr_clf(self.D['da'](img_feat * mask_attr)), attrs)
-        # loss_rep_obj1 = F.cross_entropy(self.obj_clf(self.D['do'](img_feat * mask_obj)), objs)
-        #
-        # loss_rep_attr2 = F.cross_entropy(self.attr_clf(self.D['da'](pos_attr_img_feat * mask_attr)), attrs)
-        # loss_rep_obj2 = F.cross_entropy(self.obj_clf(self.D['do'](pos_obj_img_feat * mask_obj)), objs)
-        #
-        # # loss += self.lambda_rep * (loss_rep_attr1 + loss_rep_obj1 + loss_rep_attr2 + loss_rep_obj2)
-        # loss += self.lambda_rep * (loss_rep_obj1 + loss_rep_obj2)
+        attr_one_hot = torch.nn.functional.one_hot(attrs, len(self.dset.attrs))
+        obj_one_hot = torch.nn.functional.one_hot(objs, len(self.dset.objs))
+
+        img_da_g = autograd.grad((img_da_p * attr_one_hot).sum(), img_feat, retain_graph=True)[0]
+        img_da_g_p = autograd.grad((img_da_pp * attr_one_hot).sum(), pos_attr_img_feat, retain_graph=True)[0]
+
+        img_do_g = autograd.grad((img_do_p * obj_one_hot).sum(), img_feat, retain_graph=True)[0]
+        img_do_g_p = autograd.grad((img_do_pp * obj_one_hot).sum(), pos_obj_img_feat, retain_graph=True)[0]
+
+        diff_attr = torch.abs(img_da_g - img_da_g_p)
+        perct_attr = torch.sort(diff_attr)[0][:, int(self.drop * self.emb_dim)]
+        perct_attr = perct_attr.unsqueeze(1).repeat(1, self.emb_dim)
+        mask_attr = diff_attr.lt(perct_attr.to(device)).float()
+
+        diff_obj = torch.abs(img_do_g - img_do_g_p)
+        perct_obj = torch.sort(diff_obj)[0][:, int(self.drop * self.emb_dim)]
+        perct_obj = perct_obj.unsqueeze(1).repeat(1, self.emb_dim)
+        mask_obj = diff_obj.lt(perct_obj.to(device)).float()
+
+        loss_rep_attr1 = F.cross_entropy(self.attr_clf(self.D['da'](img_feat * mask_attr)), attrs)
+        loss_rep_obj1 = F.cross_entropy(self.obj_clf(self.D['do'](img_feat * mask_obj)), objs)
+
+        loss_rep_attr2 = F.cross_entropy(self.attr_clf(self.D['da'](pos_attr_img_feat * mask_attr)), attrs)
+        loss_rep_obj2 = F.cross_entropy(self.obj_clf(self.D['do'](pos_obj_img_feat * mask_obj)), objs)
+
+        # loss += self.lambda_rep * (loss_rep_attr1 + loss_rep_obj1 + loss_rep_attr2 + loss_rep_obj2)
+        loss += self.lambda_rep * (loss_rep_obj1 + loss_rep_obj2)
 
 
 # loss grad
-#         attr_grads = []
-#         attr_env_loss = [loss_attr, loss_pos_attr]
-#         attr_network = nn.Sequential(self.D['da'], self.attr_clf)
-#         for i in range(2):
-#             attr_env_grad = autograd.grad(attr_env_loss[i], attr_network.parameters(), create_graph=True)
-#             attr_grads.append(attr_env_grad)
-#         attr_penalty_value = 0
-#         for i in range(len(attr_grads[0])):
-#             attr_penalty_value += (attr_grads[0][i] - attr_grads[1][i]).pow(2).sum()
-#         loss_grad_attr = attr_penalty_value
-#
-#         obj_grads = []
-#         obj_env_loss = [loss_obj, loss_pos_obj]
-#         obj_network = nn.Sequential(self.D['do'], self.obj_clf)
-#         for i in range(2):
-#             obj_env_grad = autograd.grad(obj_env_loss[i], obj_network.parameters(), create_graph=True)
-#             obj_grads.append(obj_env_grad)
-#         obj_penalty_value = 0
-#         for i in range(len(obj_grads[0])):
-#             obj_penalty_value += (obj_grads[0][i] - obj_grads[1][i]).pow(2).sum()
-#         loss_grad_obj = obj_penalty_value
-#
-#         # loss += self.lambda_grad * (loss_grad_attr + loss_grad_obj)
-#         loss += self.lambda_grad * loss_grad_obj
+        attr_grads = []
+        attr_env_loss = [loss_attr, loss_pos_attr]
+        attr_network = nn.Sequential(self.D['da'], self.attr_clf)
+        for i in range(2):
+            attr_env_grad = autograd.grad(attr_env_loss[i], attr_network.parameters(), create_graph=True)
+            attr_grads.append(attr_env_grad)
+        attr_penalty_value = 0
+        for i in range(len(attr_grads[0])):
+            attr_penalty_value += (attr_grads[0][i] - attr_grads[1][i]).pow(2).sum()
+        loss_grad_attr = attr_penalty_value
+
+        obj_grads = []
+        obj_env_loss = [loss_obj, loss_pos_obj]
+        obj_network = nn.Sequential(self.D['do'], self.obj_clf)
+        for i in range(2):
+            obj_env_grad = autograd.grad(obj_env_loss[i], obj_network.parameters(), create_graph=True)
+            obj_grads.append(obj_env_grad)
+        obj_penalty_value = 0
+        for i in range(len(obj_grads[0])):
+            obj_penalty_value += (obj_grads[0][i] - obj_grads[1][i]).pow(2).sum()
+        loss_grad_obj = obj_penalty_value
+
+        # loss += self.lambda_grad * (loss_grad_attr + loss_grad_obj)
+        loss += self.lambda_grad * loss_grad_obj
 
 
 # loss rec

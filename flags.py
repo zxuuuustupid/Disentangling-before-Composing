@@ -22,10 +22,10 @@ parser.add_argument('--emb_dim', type=int, default=300, help='dimension of share
 parser.add_argument('--bias', type=float, default=0, help='Bias value for unseen concepts')
 parser.add_argument('--drop', type=float, default=0.5, help='drop rate')
 parser.add_argument('--res_epoch', type=float, default=1, help='res_epoch')
-parser.add_argument('--lambda_rep', type=float, default=1 / 12, help='weight of rep losses at the representation level')
-parser.add_argument('--lambda_grad', type=float, default=1 / 12, help='weight of grad losses at the gradient level')
-parser.add_argument('--lambda_rec', type=float, default=1 / 12, help='weight of rec losses at the erd')
-parser.add_argument('--lambda_res', type=float, default=1 / 12, help='weight of res losses at the erd')
+parser.add_argument('--lambda_rep', type=float, default=1 / 10, help='weight of rep losses at the representation level')
+parser.add_argument('--lambda_grad', type=float, default=1 / 10, help='weight of grad losses at the gradient level')
+parser.add_argument('--lambda_rec', type=float, default=1 / 10, help='weight of rec losses at the erd')
+parser.add_argument('--lambda_res', type=float, default=1 / 10, help='weight of res losses at the erd')
 
 # Hyperparameters
 parser.add_argument('--topk', type=int, default=1, help="Compute topk accuracy")
