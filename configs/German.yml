@@ -1,7 +1,6 @@
 dataset:
   data_dir: dataset/German
   dataset: German
-  splitname: compositional-split-natural-3
 experiment:
   name: DBC/German/German
 model_params:

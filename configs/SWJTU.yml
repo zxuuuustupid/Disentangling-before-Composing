@@ -1,7 +1,6 @@
 dataset:
   data_dir: dataset/SWJTU
   dataset: Canada
-  splitname: compositional-split-natural
 experiment:
   name: DBC/SWJTU/SWJTU
 model_params:

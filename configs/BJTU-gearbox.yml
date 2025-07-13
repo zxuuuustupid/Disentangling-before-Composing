@@ -1,7 +1,6 @@
 dataset:
   data_dir: dataset/BJTU-gearbox
   dataset: BJTU-gearbox
-  splitname: compositional-split-natural9x4-8
 experiment:
   name: DBC/BJTU-gearbox/BJTU-gearbox9x4-8
 model_params:

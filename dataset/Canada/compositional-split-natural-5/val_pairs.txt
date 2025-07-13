@@ -13,3 +13,8 @@ B CF
 B H
 B IF
 B OF
+A BF
+A CF
+A H
+A IF
+A OF

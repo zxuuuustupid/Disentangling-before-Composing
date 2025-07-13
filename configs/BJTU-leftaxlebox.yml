@@ -1,7 +1,6 @@
 dataset:
   data_dir: dataset/BJTU-leftaxlebox
   dataset: BJTU-leftaxlebox
-  splitname: compositional-split-natural9x4-12
 experiment:
   name: DBC/BJTU-leftaxlebox/BJTU-leftaxlebox9x4-12
 model_params:
