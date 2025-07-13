@@ -4,5 +4,5 @@ ut-zappos/
 __pycache__/
 dataset/*/images/
 logs/
-result/
 .ipynb_checkpoints/
+*.7z

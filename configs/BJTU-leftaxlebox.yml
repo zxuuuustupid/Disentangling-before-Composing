@@ -5,17 +5,17 @@ experiment:
   name: DBC/BJTU-leftaxlebox/BJTU-leftaxlebox9x4-12
 model_params:
   emb_dim: 300
-splitname: compositional-split-natural-28
+splitname: compositional-split-natural-12
 training:
   batch_size: 32
   drop: 0.3
   load: null
   lr: 0.0001
   max_epochs: 9
-  res_epoch: 20
+  res_epoch: 0
   save_every: 10000
   test_batch_size: 32
   test_set: val
   topk: 1
   wd: 5.0e-05
-  workers: 4
+  workers: 8

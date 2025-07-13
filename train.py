@@ -124,6 +124,7 @@ def main():
         print('Loaded model from ', args.load)
 
     for epoch in tqdm(range(start_epoch, args.max_epochs + 1), desc='Current epoch', dynamic_ncols=True):
+        # print("====================",epoch,args.max_epochs + 1)
         train(epoch, model, trainloader, optimizer, writer)
         if epoch % args.eval_val_every == 0:
             with torch.no_grad():
@@ -278,7 +279,14 @@ def test(epoch, model, testloader, evaluator, writer, args, logpath):
         obj_acc_dir = os.path.join('result', 'obj_acc_per_attr', dataset_name)
         os.makedirs(obj_acc_dir, exist_ok=True)
 
-        acc_df = pd.DataFrame(acc_array.numpy(), columns=testloader.dataset.objs)  # acc_array: [#attr, #obj]
+        # print("acc_array.shape:", acc_array.shape)
+        # print("objs:", testloader.dataset.objs)
+
+        # acc_df = pd.DataFrame(acc_array, columns=testloader.dataset.objs)
+
+        acc_df = pd.DataFrame(acc_array, columns=["attr_id", "seen_obj_acc", "unseen_obj_acc", "total_obj_acc"])
+
+        # acc_array: [#attr, #obj]
         acc_df.index = testloader.dataset.attrs
         acc_df.to_csv(os.path.join(obj_acc_dir, f'task-{get_task_id(args.splitname)}.csv'))
 
@@ -286,9 +294,9 @@ def test(epoch, model, testloader, evaluator, writer, args, logpath):
         confusion_dir = os.path.join('result', 'confusion_max', dataset_name, f'task-{get_task_id(args.splitname)}')
         os.makedirs(confusion_dir, exist_ok=True)
 
-        for i, matrix in enumerate(confusion_accuracy):  # [#attr, #obj, #obj]
-            attr_name = testloader.dataset.attrs[i]
-            matrix_df = pd.DataFrame(matrix.numpy(), index=testloader.dataset.objs, columns=testloader.dataset.objs)
+        for attr_idx, matrix in confusion_accuracy.items():  # ✅ 正确使用字典
+            attr_name = testloader.dataset.attrs[attr_idx]  # ⬅️ 根据 index 找属性名
+            matrix_df = pd.DataFrame(matrix, index=testloader.dataset.objs, columns=testloader.dataset.objs)
             matrix_df.to_csv(os.path.join(confusion_dir, f'{attr_name}.csv'))
 
     # if stats['AUC'] > best_auc:
@@ -436,6 +444,3 @@ if __name__ == '__main__':
                 main()
             except KeyboardInterrupt:
                 print('Early stopped for', config_file)
-            except Exception as e:
-                print(f'Error running config {config_file}, split {split_id}: {e}')
-

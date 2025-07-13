@@ -18,4 +18,4 @@ training:
   test_set: val
   topk: 1
   wd: 5.0e-05
-  workers: 4
+  workers: 8

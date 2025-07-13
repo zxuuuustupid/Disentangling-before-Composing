@@ -1,7 +1,8 @@
 import argparse
 
-DATA_FOLDER = "F:/Project/CZSL/code/Disentangling-before-Composing/Disentangling-before-Composing"
+# DATA_FOLDER = "F:/Project/CZSL/code/Disentangling-before-Composing/Disentangling-before-Composing"
 
+DATA_FOLDER = "D:/zuoyichen/code"
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
 parser.add_argument('--config', default='configs/zappos.yml', help='path of the config file')
@@ -29,10 +30,10 @@ parser.add_argument('--lambda_res', type=float, default=1 / 10, help='weight of 
 
 # Hyperparameters
 parser.add_argument('--topk', type=int, default=1, help="Compute topk accuracy")
-parser.add_argument('--workers', type=int, default=4, help="Number of workers")
-parser.add_argument('--batch_size', type=int, default=8, help="Training batch size")
+parser.add_argument('--workers', type=int, default=8, help="Number of workers")
+parser.add_argument('--batch_size', type=int, default=32, help="Training batch size")
 parser.add_argument('--lr', type=float, default=5e-5, help="Learning rate")
 parser.add_argument('--wd', type=float, default=5e-5, help="Weight decay")
 parser.add_argument('--save_every', type=int, default=10000, help="Frequency of snapshots in epochs")
 parser.add_argument('--eval_val_every', type=int, default=1, help="Frequency of eval in epochs")
-parser.add_argument('--max_epochs', type=int, default=800, help="Max number of epochs")
+parser.add_argument('--max_epochs', type=int, default=9, help="Max number of epochs")

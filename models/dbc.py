@@ -93,8 +93,8 @@ class DBC(nn.Module):
         self.recon_lossf = nn.MSELoss()
         self.res_epoch = args.res_epoch
 
-        # self.lambda_rep = args.lambda_rep
-        # self.lambda_grad = args.lambda_grad
+        self.lambda_rep = args.lambda_rep
+        self.lambda_grad = args.lambda_grad
         self.lambda_rec = args.lambda_rec
         self.lambda_res = args.lambda_res
 

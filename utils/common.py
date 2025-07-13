@@ -429,5 +429,7 @@ class Evaluator:
                 acc_mat = np.divide(mat, row_sums, where=row_sums != 0)
             confusion_accuracy[attr] = acc_mat
 
+        # print(confusion_accuracy)
+
         return stats, acc_array, confusion_accuracy
 
