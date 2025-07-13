@@ -61,6 +61,9 @@ class CompositionDataset(Dataset):
         self.feat_dim = 512
 
         self.attrs, self.objs, self.pairs, self.train_pairs, self.val_pairs, self.test_pairs = self.parse_split()
+        self.num_attrs = len(self.attrs)
+        self.num_objs = len(self.objs)
+
         self.train_data, self.val_data, self.test_data = self.get_split_info()
 
         self.obj2idx = {obj: idx for idx, obj in enumerate(self.objs)}

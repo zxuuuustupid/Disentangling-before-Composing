@@ -1,0 +1,10 @@
+A BF
+A CF
+A H
+A IF
+A OF
+B BF
+B CF
+B H
+B IF
+B OF

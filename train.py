@@ -318,6 +318,73 @@ def test(epoch, model, testloader, evaluator, writer, args, logpath):
         w.writerow(stats)
 
 
+# if __name__ == '__main__':
+#     config_list = [
+#         'configs/German.yml',
+#         'configs/BJTU-leftaxlebox.yml',
+#         'configs/BJTU-gearbox.yml',
+#         'configs/BJTU-motor.yml',
+#         'configs/Canada.yml',
+#         'configs/SWJTU.yml',
+#         'configs/SF-ship.yml'
+#     ]
+#
+#     # 每个数据集对应的 split ID 列表
+#     split_id_map = {
+#         'BJTU':   [8, 12, 20, 28],
+#         'German': [3, 6, 9],
+#         'SWJTU':  [6, 12, 18],
+#         'Canada': [5, 10, 15]
+#     }
+#
+#     for config_file in config_list:
+#         # 在 split_id_map 中找到对应的 split ids
+#         matched = False
+#         for key in split_id_map:
+#             if key in config_file:
+#                 split_ids = split_id_map[key]
+#                 matched = True
+#                 break
+#         if not matched:
+#             print(f'❌ 配置文件 {config_file} 没有匹配到任何 split_id，请检查文件名是否包含 BJTU、German、SWJTU 或 Canada')
+#             sys.exit(1)
+#
+#         for split_id in split_ids:
+#             # 设置 sys.argv 以模拟命令行参数传入
+#             sys.argv = [sys.argv[0], '--config', config_file]
+#
+#             args = parser.parse_args()
+#             load_args(config_file, args)
+#
+#             # 修改 splitname 和实验名
+#             args.splitname = f'compositional-split-natural-{split_id}'
+#             args.name = f'{args.name}_s{split_id}'
+#             setattr(args, "splitname", f'compositional-split-natural-{split_id}')
+#
+#             print(f'\n================ Running config: {config_file} | split: {args.splitname} ================\n')
+#
+#             try:
+#                 main()
+#             except KeyboardInterrupt:
+#                 print('Early stopped for', config_file)
+#             except Exception as e:
+#                 print(f'Error running config {config_file}, split {split_id}: {e}')
+
+import yaml
+
+def modify_yaml_splitname(path, new_splitname):
+    """直接修改 yml 文件中的 splitname 字段"""
+    import yaml
+    with open(path, 'r') as f:
+        config_data = yaml.safe_load(f)
+
+    config_data['splitname'] = new_splitname
+
+    with open(path, 'w') as f:
+        yaml.dump(config_data, f, default_flow_style=False)  # ✅ 保持正常 YAML 格式
+
+
+
 if __name__ == '__main__':
     config_list = [
         'configs/German.yml',
@@ -329,7 +396,6 @@ if __name__ == '__main__':
         'configs/SF-ship.yml'
     ]
 
-    # 每个数据集对应的 split ID 列表
     split_id_map = {
         'BJTU':   [8, 12, 20, 28],
         'German': [3, 6, 9],
@@ -338,7 +404,6 @@ if __name__ == '__main__':
     }
 
     for config_file in config_list:
-        # 在 split_id_map 中找到对应的 split ids
         matched = False
         for key in split_id_map:
             if key in config_file:
@@ -350,21 +415,27 @@ if __name__ == '__main__':
             sys.exit(1)
 
         for split_id in split_ids:
-            # 设置 sys.argv 以模拟命令行参数传入
-            sys.argv = [sys.argv[0], '--config', config_file]
+            splitname = f'compositional-split-natural-{split_id}'
 
+            # ✅ 修改 yml 中的 splitname 字
+
+            # 设置命令行参数
+            sys.argv = [sys.argv[0], '--config', config_file]
             args = parser.parse_args()
             load_args(config_file, args)
 
-            # 修改 splitname 和实验名
-            args.splitname = f'compositional-split-natural-{split_id}'
+            # ✅ 自动加上 split ID 后缀的实验名
             args.name = f'{args.name}_s{split_id}'
+            modify_yaml_splitname(config_file, splitname)
 
-            print(f'\n================ Running config: {config_file} | split: {args.splitname} ================\n')
+            print(f'\n================ Running config: {config_file} | split: {splitname} ================\n')
 
             try:
+                # print('当前使用的数据目录:', args.data_dir)
+
                 main()
             except KeyboardInterrupt:
                 print('Early stopped for', config_file)
             except Exception as e:
                 print(f'Error running config {config_file}, split {split_id}: {e}')
+

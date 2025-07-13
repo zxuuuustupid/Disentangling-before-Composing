@@ -1,22 +1,22 @@
----
-experiment:
-  name: DBC/German/German
 dataset:
   data_dir: dataset/German
   dataset: German
-  splitname: compositional-split-natural
+  splitname: compositional-split-natural-3
+experiment:
+  name: DBC/German/German
 model_params:
   emb_dim: 300
+splitname: compositional-split-natural-9
 training:
   batch_size: 32
-  load:
+  drop: 0.3
+  load: null
   lr: 0.0001
   max_epochs: 9
+  res_epoch: 1
   save_every: 10000
   test_batch_size: 32
   test_set: val
   topk: 1
   wd: 5.0e-05
   workers: 4
-  drop: 0.3
-  res_epoch: 1

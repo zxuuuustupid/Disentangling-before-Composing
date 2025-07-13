@@ -2,6 +2,7 @@
 .gitignore
 ut-zappos/
 __pycache__/
-dataset/
+dataset/*/images/
 logs/
+result/
 .ipynb_checkpoints/

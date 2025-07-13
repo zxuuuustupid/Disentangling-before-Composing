@@ -30,12 +30,43 @@ def save_args(args, log_path, argfile):
     with open(ospj(log_path, 'args.txt'), 'w') as f:
         f.write('\n'.join(sys.argv[1:]))
 
-def load_args(filename, args):
-    with open(filename, 'r') as stream:
-        data_loaded = yaml.safe_load(stream)
-    for key, group in data_loaded.items():
-        for key, val in group.items():
-            setattr(args, key, val)
+# def load_args(filename, args):
+#     with open(filename, 'r') as stream:
+#         data_loaded = yaml.safe_load(stream)
+#     for key, group in data_loaded.items():
+#         for key, val in group.items():
+#             setattr(args, key, val)
+
+import yaml
+
+def load_args(config_file, args):
+    with open(config_file, 'r') as f:
+        cfg = yaml.safe_load(f)
+
+    def flatten(d, parent_key=''):
+        items = []
+        for k, v in d.items():
+            new_key = f'{parent_key}.{k}' if parent_key else k
+            if isinstance(v, dict):
+                items.extend(flatten(v, new_key).items())
+            else:
+                items.append((new_key, v))
+        return dict(items)
+
+    flat_cfg = flatten(cfg)
+
+    # 最后一行加上，把扁平结果直接更新 args 的属性
+    for key, val in flat_cfg.items():
+        setattr(args, key.replace('.', '_'), val)
+
+    # 补上兼容旧逻辑：如果存在 dataset_data_dir 就设置 data_dir
+    if hasattr(args, 'dataset_data_dir'):
+        args.data_dir = getattr(args, 'dataset_data_dir')
+    if hasattr(args, 'dataset_dataset'):
+        args.dataset = getattr(args, 'dataset_dataset')
+    if hasattr(args, 'experiment_name'):
+        args.name = getattr(args, 'experiment_name')
+
 
 def imresize(img, height=None, width=None):
     # load image
