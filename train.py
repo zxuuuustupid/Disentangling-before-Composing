@@ -33,6 +33,21 @@ from utils.common import Evaluator
 from utils.utils import save_args, load_args
 from flags import parser, DATA_FOLDER
 
+def get_task_id(splitname):
+    # 从 'compositional-split-natural-4' 中提取 4
+    if 'compositional-split-natural-' in splitname:
+        return int(splitname.split('-')[-1])
+    else:
+        raise ValueError(f"无法从 splitname '{splitname}' 中提取 task id")
+
+def get_dataset_name_from_experiment_name(name):
+    parts = name.split('/')
+    if len(parts) >= 2:
+        return parts[1]
+    else:
+        raise ValueError(f"无法从 name '{name}' 中提取数据集名称")
+
+
 torch.multiprocessing.set_sharing_strategy('file_system')
 
 best_auc = 0
@@ -236,7 +251,7 @@ def test(epoch, model, testloader, evaluator, writer, args, logpath):
     if epoch == args.max_epochs:
         # 构造结果行
         final_result_row = {
-            'experiment': args.name,
+            'experiment': get_dataset_name_from_experiment_name(args.name)+str(get_dataset_name_from_experiment_name(args.name)),
             'closed_obj_match': round(stats['closed_obj_match'], 4),
             'closed_seen_obj_match': round(stats['closed_seen_obj_match'], 4),
             'closed_unseen_obj_match': round(stats['closed_unseen_obj_match'], 4)
@@ -255,6 +270,25 @@ def test(epoch, model, testloader, evaluator, writer, args, logpath):
                 writer.writeheader()
             writer.writerow(final_result_row)
 
+        import pandas as pd
+
+        # 1. 保存 每个 attribute 下的 object 准确率矩阵
+        dataset_name = get_dataset_name_from_experiment_name(args.name)
+        obj_acc_dir = os.path.join('result', 'obj_acc_per_attr', dataset_name)
+        os.makedirs(obj_acc_dir, exist_ok=True)
+
+        acc_df = pd.DataFrame(acc_array.numpy(), columns=testloader.dataset.objs)  # acc_array: [#attr, #obj]
+        acc_df.index = testloader.dataset.attrs
+        acc_df.to_csv(os.path.join(obj_acc_dir, f'task-{get_task_id(args.splitname)}.csv'))
+
+        # 2. 保存 每个 attribute 下的 object 混淆矩阵（每个 attr 一个 csv）
+        confusion_dir = os.path.join('result', 'confusion_max', dataset_name, f'task-{get_task_id(args.splitname)}')
+        os.makedirs(confusion_dir, exist_ok=True)
+
+        for i, matrix in enumerate(confusion_accuracy):  # [#attr, #obj, #obj]
+            attr_name = testloader.dataset.attrs[i]
+            matrix_df = pd.DataFrame(matrix.numpy(), index=testloader.dataset.objs, columns=testloader.dataset.objs)
+            matrix_df.to_csv(os.path.join(confusion_dir, f'{attr_name}.csv'))
 
     # if stats['AUC'] > best_auc:
     #     best_auc = stats['AUC']
