@@ -25,6 +25,56 @@ class Disentangler(nn.Module):
         x = F.dropout(x, training=self.training)
         return x
 
+import matplotlib.pyplot as plt
+from sklearn.manifold import TSNE
+import numpy as np
+
+def visualize_attr_distribution_under_obj(feat_before, feat_after, attrs, objs, obj_id, epoch):
+    """
+    feat_before: [B, D] tensor, 原始图像特征
+    feat_after: [B, D] tensor, 重排后的特征
+    attrs: [B] tensor, 属性标签
+    objs: [B] tensor, 对象标签
+    obj_id: int，选择某个 object（如 IR = 1）
+    """
+
+    # Step 1: 筛选该 object 下的样本
+    mask = (objs == obj_id)
+    feat_before = feat_before[mask]
+    feat_after = feat_after[mask]
+    attrs = attrs[mask]
+
+    if feat_before.size(0) < 2:
+        print("Too few samples with the selected object")
+        return
+
+    # Step 2: t-SNE 降维
+    tsne = TSNE(n_components=2, random_state=42)
+    feat_all = torch.cat([feat_before, feat_after], dim=0).detach().cpu().numpy()
+    feat_2d = tsne.fit_transform(feat_all)
+    feat_before_2d = feat_2d[:feat_before.size(0)]
+    feat_after_2d = feat_2d[feat_before.size(0):]
+    attrs = attrs.detach().cpu().numpy()
+
+    # Step 3: 画图
+    plt.figure(figsize=(12, 5))
+
+    plt.subplot(1, 2, 1)
+    scatter = plt.scatter(feat_before_2d[:, 0], feat_before_2d[:, 1], c=attrs, cmap='tab10', s=8)
+    plt.title(f'Before Rearrangement (obj={obj_id})')
+    plt.colorbar(scatter, label='attr_id')
+
+    plt.subplot(1, 2, 2)
+    scatter = plt.scatter(feat_after_2d[:, 0], feat_after_2d[:, 1], c=attrs, cmap='tab10', s=8)
+    plt.title(f'After Rearrangement (obj={obj_id})')
+    plt.colorbar(scatter, label='attr_id')
+
+    plt.suptitle(f'Attr Distribution under Object {obj_id} (Epoch {epoch})')
+    plt.tight_layout()
+    plt.savefig(f'visual_attr_under_obj{obj_id}_epoch{epoch}.png')
+    plt.close()
+
+
 
 class DBC(nn.Module):
 
@@ -243,6 +293,16 @@ class DBC(nn.Module):
             loss_swap = self.lambda_res * loss_swap_obj
 
             loss += loss_swap
+
+            if epoch == 10:  # 可自定义 epoch
+                visualize_attr_distribution_under_obj(
+                    feat_before=img_feat,
+                    feat_after=new_comp[0],  # 或 new_comp[1]/[2]
+                    attrs=attrs,
+                    objs=objs,
+                    obj_id=1,  # 选择一个对象，如 IR = 1
+                    epoch=epoch
+                )
 
         return loss, None
 
