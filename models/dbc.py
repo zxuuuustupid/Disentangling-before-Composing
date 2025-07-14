@@ -39,6 +39,16 @@ def visualize_attr_distribution_under_obj(feat_before, feat_after, attrs, objs, 
     """
 
     # Step 1: 筛选该 object 下的样本
+    # mask = (objs == obj_id)
+    # feat_before = feat_before[mask]
+    # feat_after = feat_after[mask]
+    # attrs = attrs[mask]
+    #
+    # if feat_before.size(0) < 2:
+    #     print("Too few samples with the selected object")
+    #     return
+
+
     mask = (objs == obj_id)
     feat_before = feat_before[mask]
     feat_after = feat_after[mask]
@@ -48,8 +58,25 @@ def visualize_attr_distribution_under_obj(feat_before, feat_after, attrs, objs, 
         print("Too few samples with the selected object")
         return
 
+    # 限制每个 attr 最多 100 个样本
+    max_per_attr = 100
+    selected_idx = []
+
+    for attr_id in torch.unique(attrs):
+        idx = (attrs == attr_id).nonzero(as_tuple=True)[0]
+        if len(idx) > max_per_attr:
+            idx = idx[torch.randperm(len(idx))[:max_per_attr]]
+        selected_idx.append(idx)
+
+    selected_idx = torch.cat(selected_idx)
+
+    feat_before = feat_before[selected_idx]
+    feat_after = feat_after[selected_idx]
+    attrs = attrs[selected_idx]
+
+
     # Step 2: t-SNE 降维
-    tsne = TSNE(n_components=2, random_state=42)
+    tsne = TSNE(n_components=2, random_state=42, perplexity=5)
     feat_all = torch.cat([feat_before, feat_after], dim=0).detach().cpu().numpy()
     feat_2d = tsne.fit_transform(feat_all)
     feat_before_2d = feat_2d[:feat_before.size(0)]
@@ -71,7 +98,7 @@ def visualize_attr_distribution_under_obj(feat_before, feat_after, attrs, objs, 
 
     plt.suptitle(f'Attr Distribution under Object {obj_id} (Epoch {epoch})')
     plt.tight_layout()
-    plt.savefig(f'visual_attr_under_obj{obj_id}_epoch{epoch}.png')
+    plt.savefig(f'result/visual_attr_under_obj{obj_id}_epoch{epoch}.png')
     plt.close()
 
 
