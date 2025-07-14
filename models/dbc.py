@@ -9,6 +9,20 @@ import numpy as np
 import torch.autograd as autograd
 from .backbone import Backbone
 import random
+import os
+import pandas as pd
+
+def save_feature_to_csv(tensor, attr_ids, folder, dataset_name):
+    for i in range(tensor.size(0)):
+        attr_id = attr_ids[i].item()
+        feature = tensor[i].detach().cpu().numpy()
+        save_dir = os.path.join('result', 'features', dataset_name, folder)
+        os.makedirs(save_dir, exist_ok=True)
+        save_path = os.path.join(save_dir, f'wc{attr_id}.csv')
+        df = pd.DataFrame([feature])
+        df.to_csv(save_path, mode='a', header=not os.path.exists(save_path), index=False)
+
+
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
@@ -28,80 +42,6 @@ class Disentangler(nn.Module):
 import matplotlib.pyplot as plt
 from sklearn.manifold import TSNE
 import numpy as np
-
-def visualize_attr_distribution_under_obj(feat_before, feat_after, attrs, objs, obj_id, epoch):
-    """
-    feat_before: [B, D] tensor, 原始图像特征
-    feat_after: [B, D] tensor, 重排后的特征
-    attrs: [B] tensor, 属性标签
-    objs: [B] tensor, 对象标签
-    obj_id: int，选择某个 object（如 IR = 1）
-    """
-
-    # Step 1: 筛选该 object 下的样本
-    # mask = (objs == obj_id)
-    # feat_before = feat_before[mask]
-    # feat_after = feat_after[mask]
-    # attrs = attrs[mask]
-    #
-    # if feat_before.size(0) < 2:
-    #     print("Too few samples with the selected object")
-    #     return
-
-
-    mask = (objs == obj_id)
-    feat_before = feat_before[mask]
-    feat_after = feat_after[mask]
-    attrs = attrs[mask]
-
-    if feat_before.size(0) < 2:
-        print("Too few samples with the selected object")
-        return
-
-    # 限制每个 attr 最多 100 个样本
-    max_per_attr = 100
-    selected_idx = []
-
-    for attr_id in torch.unique(attrs):
-        idx = (attrs == attr_id).nonzero(as_tuple=True)[0]
-        if len(idx) > max_per_attr:
-            idx = idx[torch.randperm(len(idx))[:max_per_attr]]
-        selected_idx.append(idx)
-
-    selected_idx = torch.cat(selected_idx)
-
-    feat_before = feat_before[selected_idx]
-    feat_after = feat_after[selected_idx]
-    attrs = attrs[selected_idx]
-
-
-    # Step 2: t-SNE 降维
-    tsne = TSNE(n_components=2, random_state=42, perplexity=5)
-    feat_all = torch.cat([feat_before, feat_after], dim=0).detach().cpu().numpy()
-    feat_2d = tsne.fit_transform(feat_all)
-    feat_before_2d = feat_2d[:feat_before.size(0)]
-    feat_after_2d = feat_2d[feat_before.size(0):]
-    attrs = attrs.detach().cpu().numpy()
-
-    # Step 3: 画图
-    plt.figure(figsize=(12, 5))
-
-    plt.subplot(1, 2, 1)
-    scatter = plt.scatter(feat_before_2d[:, 0], feat_before_2d[:, 1], c=attrs, cmap='tab10', s=8)
-    plt.title(f'Before Rearrangement (obj={obj_id})')
-    plt.colorbar(scatter, label='attr_id')
-
-    plt.subplot(1, 2, 2)
-    scatter = plt.scatter(feat_after_2d[:, 0], feat_after_2d[:, 1], c=attrs, cmap='tab10', s=8)
-    plt.title(f'After Rearrangement (obj={obj_id})')
-    plt.colorbar(scatter, label='attr_id')
-
-    plt.suptitle(f'Attr Distribution under Object {obj_id} (Epoch {epoch})')
-    plt.tight_layout()
-    plt.savefig(f'result/visual_attr_under_obj{obj_id}_epoch{epoch}.png')
-    plt.close()
-
-
 
 class DBC(nn.Module):
 
@@ -321,19 +261,10 @@ class DBC(nn.Module):
 
             loss += loss_swap
 
-            if epoch == 10:  # 可自定义 epoch
-                visualize_attr_distribution_under_obj(
-                    feat_before=img_feat,
-                    feat_after=new_comp[0],  # 或 new_comp[1]/[2]
-                    attrs=attrs,
-                    objs=objs,
-                    obj_id=1,  # 选择一个对象，如 IR = 1
-                    epoch=epoch
-                )
-
         return loss, None
 
     def val_forward(self, x):
+        img, attrs, objs, _ = x[:4]
         img = x[0]
 
         img = self.feat_extractor(img)[0]
@@ -349,6 +280,18 @@ class DBC(nn.Module):
         for itr, (attr, obj) in enumerate(self.dset.pairs):
             attr_id, obj_id = self.dset.attr2idx[attr], self.dset.obj2idx[obj]
             scores[(attr, obj)] = attr_pred[:, attr_id] * obj_pred[:, obj_id]
+
+        with torch.no_grad():
+            if (objs == 2).sum() > 0:
+                selected = (objs == 2)
+                dataset_name = self.args.data_dir.split('-')[0]  # 自行适配
+                save_feature_to_csv(img[selected], attrs[selected], 'before', dataset_name)
+
+                composed_feat = self.decoder(torch.cat([
+                    self.D['do'](img[selected]),
+                    self.D['da'](img[selected])
+                ], dim=1))
+                save_feature_to_csv(composed_feat, attrs[selected], 'after', dataset_name)
         return None, scores
 
     def forward(self, x, epoch):
