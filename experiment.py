@@ -3,14 +3,15 @@ import torch
 import os
 from torch.utils.data import DataLoader
 from tqdm import tqdm
-from models.dbc import DBC
+from models.dbc1 import DBC
 from data import dataset as dset
 from utils.utils import load_args
 from flags import parser, DATA_FOLDER
 
-# sys.argv += ['--config', 'configs/BJTU-motor.yml']
+sys.argv += ['--config', 'configs/BJTU-motor.yml']
+
 # sys.argv += ['--config', 'configs/BJTU-leftaxlebox.yml']
-sys.argv += ['--config', 'configs/SWJTU.yml']
+# sys.argv += ['--config', 'configs/SWJTU.yml']
 # sys.argv += ['--config', 'configs/Canada.yml']
 # sys.argv += ['--config', 'configs/BJTU-gearbox.yml']
 
