@@ -8,7 +8,11 @@ from data import dataset as dset
 from utils.utils import load_args
 from flags import parser, DATA_FOLDER
 
-sys.argv += ['--config', 'configs/German.yml']
+sys.argv += ['--config', 'configs/BJTU-motor.yml']
+sys.argv += ['--config', 'configs/BJTU-leftaxlebox.yml']
+sys.argv += ['--config', 'configs/SWJTU.yml']
+sys.argv += ['--config', 'configs/Canada.yml']
+sys.argv += ['--config', 'configs/BJTU-gearbox.yml']
 
 def freeze(m):
     m.eval()
