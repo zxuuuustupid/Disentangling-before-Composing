@@ -4,8 +4,8 @@ import numpy as np
 from sklearn.manifold import TSNE
 
 # 设置你的数据目录和输出文件路径
-input_dir = '../result/features/dataset/German/after/'  # 这里改成你的目标目录
-output_csv = '../result/features/dataset/German/after/tsne.csv'
+input_dir = '../result/features/dataset/SWJTU/before/'  # 这里改成你的目标目录
+output_csv = '../result/features/dataset/SWJTU/before/tsne.csv'
 
 # 收集所有csv中的数据
 all_features = []
