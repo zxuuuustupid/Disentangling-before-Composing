@@ -154,7 +154,7 @@ class DBC(nn.Module):
         loss_obj = F.cross_entropy(self.obj_clf(img_do), objs)
         loss_pos_obj = F.cross_entropy(self.obj_clf(pos_obj_img_do), objs)
 
-        loss = self.lambda_rep *loss_attr + loss_obj + self.lambda_rep*loss_pos_attr + loss_pos_obj + self.lambda_rep*loss_neg_attr + loss_neg_obj
+        loss = 0.33333*(self.lambda_rep *loss_attr + loss_obj + self.lambda_rep*loss_pos_attr + loss_pos_obj + self.lambda_rep*loss_neg_attr + loss_neg_obj)
         # loss = loss_obj + loss_pos_obj + loss_neg_obj
 
 
