@@ -125,7 +125,7 @@ def ablation_run():
                 optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=args.lr)
                 evaluator = Evaluator(testset, model)
 
-                for epoch in range(args.max_epochs - 1):
+                for epoch in range(args.max_epochs + 1):
                     train(epoch, model, trainloader, optimizer, device)
 
                 acc = test(epoch, model, testloader, evaluator, writer, args, None)

@@ -1,8 +1,8 @@
 import argparse
 
-DATA_FOLDER = "F:/Project/CZSL/code/Disentangling-before-Composing/Disentangling-before-Composing"
-
-# DATA_FOLDER = "D:/zuoyichen/code"
+# DATA_FOLDER = "F:/Project/CZSL/code/Disentangling-before-Composing/Disentangling-before-Composing"
+#
+DATA_FOLDER = "D:/zuoyichen/code"
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
 parser.add_argument('--config', default='configs/zappos.yml', help='path of the config file')
