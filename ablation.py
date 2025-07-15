@@ -20,16 +20,16 @@ ABLATION_CONFIGS = [
     'configs/SWJTU.yml'
 ]
 
-ABLATION_COMBOS = [
-    (0, 0, 0, 0),  # all zero
-    (0, 1, 0, 0),  # only rep
-    (0, 0, 1, 0),  # only grad
-    (0, 1, 1, 0),  # rep + grad
-    (1, 0, 0, 0),  # only rec
-    (1, 1, 1, 0),  # only res
-    (1, 1, 1, 1),  # all one
-]
-
+# ABLATION_COMBOS = [
+#     (0, 0, 0, 0),  # all zero
+#     (0, 1, 0, 0),  # only rep
+#     (0, 0, 1, 0),  # only grad
+#     (0, 1, 1, 0),  # rep + grad
+#     (1, 0, 0, 0),  # only rec
+#     (1, 1, 1, 0),  # only res
+#     (1, 1, 1, 1),  # all one
+# ]
+ABLATION_COMBOS=[(1/12,1/12,1/12,0),(1/12,1/12,1/12,1)]
 
 def freeze(m):
     m.eval()
@@ -79,11 +79,11 @@ def test(epoch, model, testloader, evaluator, writer, args, logpath):
 
 
 def ablation_run():
-    os.makedirs('result/ablation', exist_ok=True)
+    os.makedirs('result/ablation2', exist_ok=True)
 
     for config_file in ABLATION_CONFIGS:
         config_name = os.path.basename(config_file).replace('.yml', '')
-        csv_path = os.path.join('result/ablation', f'{config_name}.csv')
+        csv_path = os.path.join('result/ablation2', f'{config_name}.csv')
 
         with open(csv_path, 'w', newline='') as f:
             writer = csv.writer(f)
