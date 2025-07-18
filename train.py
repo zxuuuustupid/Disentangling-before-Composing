@@ -395,11 +395,11 @@ def modify_yaml_splitname(path, new_splitname):
 
 if __name__ == '__main__':
     config_list = [
-        # 'configs/German.yml',
-        # 'configs/BJTU-leftaxlebox.yml',
-        # 'configs/BJTU-gearbox.yml',
-        # 'configs/BJTU-motor.yml',
-        # 'configs/Canada.yml',
+        'configs/German.yml',
+        'configs/BJTU-leftaxlebox.yml',
+        'configs/BJTU-gearbox.yml',
+        'configs/BJTU-motor.yml',
+        'configs/Canada.yml',
         'configs/SWJTU.yml',
     ]
 

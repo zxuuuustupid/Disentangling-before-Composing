@@ -3,8 +3,8 @@ import numpy as np
 from sklearn.metrics import pairwise_distances
 import os
 
-input_csv = 'F:\Project\CZSL\code\Disentangling-before-Composing\Disentangling-before-Composing\\result\\features\dataset\BJTU-gearbox\\after\\tsne.csv'
-output_csv = 'F:\Project\CZSL\code\Disentangling-before-Composing\Disentangling-before-Composing\\result\\features\dataset\BJTU-gearbox\\after\\tsne-2.csv'
+input_csv = 'F:\Project\CZSL\code\Disentangling-before-Composing\Disentangling-before-Composing\\result\\features\dataset\German\\after\\tsne.csv'
+output_csv = 'F:\Project\CZSL\code\Disentangling-before-Composing\Disentangling-before-Composing\\result\\features\dataset\German\\after\\tsne-2.csv'
 
 
 def select_tightest_cluster(points, k=300):
