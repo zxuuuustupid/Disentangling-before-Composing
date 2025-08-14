@@ -3,12 +3,13 @@ import torch
 import os
 from torch.utils.data import DataLoader
 from tqdm import tqdm
-from models.dbc1 import DBC
+from models.IVR import IVR
+from models.dbc import DBC
 from data import dataset as dset
 from utils.utils import load_args
 from flags import parser, DATA_FOLDER
 
-sys.argv += ['--config', 'configs/BJTU-motor.yml']
+# sys.argv += ['--config', 'configs/BJTU-motor.yml']
 
 # sys.argv += ['--config', 'configs/BJTU-leftaxlebox.yml']
 # sys.argv += ['--config', 'configs/SWJTU.yml']
@@ -26,7 +27,7 @@ def train(epoch, model, trainloader, optimizer, device):
     total_loss = 0.0
     for idx, data in tqdm(enumerate(trainloader), total=len(trainloader), desc=f'Training Epoch {epoch}'):
         data = [d.to(device) for d in data]
-        loss, _ = model(data, epoch)
+        loss, _ = model(data,epoch)
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
@@ -62,6 +63,7 @@ def main():
     trainloader = DataLoader(trainset, batch_size=args.batch_size, shuffle=True, num_workers=4)
     testloader = DataLoader(testset, batch_size=args.batch_size, shuffle=False, num_workers=4)
 
+    # model = IVR(trainset, args).to(device)
     model = DBC(trainset, args).to(device)
     freeze(model.feat_extractor)
 

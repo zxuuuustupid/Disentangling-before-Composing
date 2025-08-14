@@ -1,8 +1,8 @@
 import argparse
 
-# DATA_FOLDER = "F:/Project/CZSL/code/Disentangling-before-Composing/Disentangling-before-Composing"
-#
-DATA_FOLDER = "D:/zuoyichen/code"
+DATA_FOLDER = "F:/Project/CZSL/code/Disentangling-before-Composing/Disentangling-before-Composing"
+
+# DATA_FOLDER = "D:/zuoyichen/code"
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
 parser.add_argument('--config', default='configs/zappos.yml', help='path of the config file')
@@ -23,6 +23,8 @@ parser.add_argument('--emb_dim', type=int, default=300, help='dimension of share
 parser.add_argument('--bias', type=float, default=0, help='Bias value for unseen concepts')
 parser.add_argument('--drop', type=float, default=0.5, help='drop rate')
 parser.add_argument('--res_epoch', type=float, default=1, help='res_epoch')
+parser.add_argument('--nlayers', type=int, default=3, help='Layers in the image embedder')
+parser.add_argument('--cosine_scale', type=float, default=20,help="Scale for cosine similarity")
 parser.add_argument('--lambda_rep', type=float, default=1 / 10, help='weight of rep losses at the representation level')
 parser.add_argument('--lambda_grad', type=float, default=1 / 10, help='weight of grad losses at the gradient level')
 parser.add_argument('--lambda_rec', type=float, default=1 / 10, help='weight of rec losses at the erd')

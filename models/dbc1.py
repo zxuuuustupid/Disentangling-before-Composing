@@ -12,15 +12,15 @@ import random
 import os
 import pandas as pd
 
-def save_feature_to_csv(tensor, attr_ids, folder, dataset_name):
-    for i in range(tensor.size(0)):
-        attr_id = attr_ids[i].item()
-        feature = tensor[i].detach().cpu().numpy()
-        save_dir = os.path.join('result', 'features', dataset_name, folder)
-        os.makedirs(save_dir, exist_ok=True)
-        save_path = os.path.join(save_dir, f'wc{attr_id}.csv')
-        df = pd.DataFrame([feature])
-        df.to_csv(save_path, mode='a', header=not os.path.exists(save_path), index=False)
+# def save_feature_to_csv(tensor, attr_ids, folder, dataset_name):
+#     for i in range(tensor.size(0)):
+#         attr_id = attr_ids[i].item()
+#         feature = tensor[i].detach().cpu().numpy()
+#         save_dir = os.path.join('result', 'features', dataset_name, folder)
+#         os.makedirs(save_dir, exist_ok=True)
+#         save_path = os.path.join(save_dir, f'wc{attr_id}.csv')
+#         df = pd.DataFrame([feature])
+#         df.to_csv(save_path, mode='a', header=not os.path.exists(save_path), index=False)
 
 
 
@@ -120,8 +120,9 @@ class DBC(nn.Module):
         pos_attr_img, neg_objs, pos_obj_img, neg_attrs = x[4], x[5], x[6], x[7]
         neg_obj_pairs, neg_attr_pairs = x[10], x[11]
 
-
+        # print(img.shape)
         img = self.feat_extractor(img)[0]
+        # print(img.shape)
         img = self.img_embedder(img)
         img_feat = self.img_avg_pool(img).squeeze()
 

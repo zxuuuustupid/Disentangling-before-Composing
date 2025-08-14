@@ -288,7 +288,7 @@ def test(epoch, model, testloader, evaluator, writer, args, logpath):
 
         # acc_array: [#attr, #obj]
         acc_df.index = testloader.dataset.attrs
-        acc_df.to_csv(os.path.join(obj_acc_dir, f'task-{get_task_id(args.splitname)}.csv'))
+        # acc_df.to_csv(os.path.join(obj_acc_dir, f'task-{get_task_id(args.splitname)}.csv'))
 
         # 2. 保存 每个 attribute 下的 object 混淆矩阵（每个 attr 一个 csv）
         confusion_dir = os.path.join('result', 'confusion_max', dataset_name, f'task-{get_task_id(args.splitname)}')
@@ -297,7 +297,7 @@ def test(epoch, model, testloader, evaluator, writer, args, logpath):
         for attr_idx, matrix in confusion_accuracy.items():  # ✅ 正确使用字典
             attr_name = testloader.dataset.attrs[attr_idx]  # ⬅️ 根据 index 找属性名
             matrix_df = pd.DataFrame(matrix, index=testloader.dataset.objs, columns=testloader.dataset.objs)
-            matrix_df.to_csv(os.path.join(confusion_dir, f'{attr_name}.csv'))
+            # matrix_df.to_csv(os.path.join(confusion_dir, f'{attr_name}.csv'))
 
     # if stats['AUC'] > best_auc:
     #     best_auc = stats['AUC']
