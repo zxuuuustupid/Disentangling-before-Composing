@@ -227,7 +227,7 @@ class DBC(nn.Module):
         # loss_rec = self.lambda_rec * (loss_rec_ao + loss_rec_aoo + loss_rec_aao)
         loss_rec = self.lambda_rec * (loss_rec_ao + loss_rec_aoo + loss_rec_aao)
 
-        loss += loss_rec
+        # loss += loss_rec
 
 
 # Core
@@ -259,7 +259,7 @@ class DBC(nn.Module):
             # loss_swap = self.lambda_res * (loss_swap_attr + loss_swap_obj)
             loss_swap = self.lambda_res * loss_swap_obj
 
-            loss += loss_swap
+            # loss += loss_swap
 
         return loss, None
 

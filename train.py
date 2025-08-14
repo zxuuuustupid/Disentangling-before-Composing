@@ -262,7 +262,7 @@ def test(epoch, model, testloader, evaluator, writer, args, logpath):
         # 创建 result 目录
         result_dir = os.path.join(os.getcwd(), 'result')
         os.makedirs(result_dir, exist_ok=True)
-        result_csv = os.path.join(result_dir, 'results.csv')
+        result_csv = os.path.join(result_dir, 'res.csv')
 
         # 写入 CSV（追加或创建）
         write_header = not os.path.exists(result_csv)

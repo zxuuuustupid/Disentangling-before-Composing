@@ -5,7 +5,7 @@ experiment:
   name: DBC/BJTU-motor/BJTU-motor9x5-25
 model_params:
   emb_dim: 300
-splitname: compositional-split-natural-8
+splitname: compositional-split-natural-28
 training:
   batch_size: 32
   drop: 0.3
