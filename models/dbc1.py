@@ -12,13 +12,13 @@ import random
 import os
 import pandas as pd
 
-# def save_feature_to_csv(tensor, attr_ids, folder, dataset_name):
+# def save_feature_to_csv(tensor, obj_ids, folder, dataset_name):
 #     for i in range(tensor.size(0)):
-#         attr_id = attr_ids[i].item()
+#         obj_id = obj_ids[i].item()
 #         feature = tensor[i].detach().cpu().numpy()
 #         save_dir = os.path.join('result', 'features', dataset_name, folder)
 #         os.makedirs(save_dir, exist_ok=True)
-#         save_path = os.path.join(save_dir, f'wc{attr_id}.csv')
+#         save_path = os.path.join(save_dir, f'fault{obj_id}.csv')
 #         df = pd.DataFrame([feature])
 #         df.to_csv(save_path, mode='a', header=not os.path.exists(save_path), index=False)
 
@@ -257,8 +257,8 @@ class DBC(nn.Module):
                 loss_swap_attr += F.cross_entropy(self.attr_clf(self.D['da'](new_comp[i])), a_y[a[i]])
                 loss_swap_obj += F.cross_entropy(self.obj_clf(self.D['do'](new_comp[i])), o_y[o[i]])
 
-            # loss_swap = self.lambda_res * (loss_swap_attr + loss_swap_obj)
-            loss_swap = self.lambda_res * loss_swap_obj
+            loss_swap = self.lambda_res * (loss_swap_attr + loss_swap_obj)
+            # loss_swap = self.lambda_res * loss_swap_obj
 
             loss += loss_swap
 
