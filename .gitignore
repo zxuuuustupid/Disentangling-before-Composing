@@ -6,3 +6,5 @@ dataset/*/images/
 logs/
 .ipynb_checkpoints/
 *.7z
+*.csv
+*.xlsx

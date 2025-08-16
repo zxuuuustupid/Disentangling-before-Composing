@@ -284,7 +284,7 @@ class DBC(nn.Module):
         with torch.no_grad():
             if (attrs == 1).sum() > 0:
                 selected = (attrs == 1)
-                dataset_name = self.args.data_dir.split('-')[0]  # 自行适配
+                dataset_name = self.args.data_dir # 自行适配
                 save_feature_to_csv(img[selected], objs[selected], 'before', dataset_name)
 
                 composed_feat = self.decoder(torch.cat([
